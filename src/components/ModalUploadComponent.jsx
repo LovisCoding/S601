@@ -22,7 +22,7 @@ import {useTheme} from "@mui/material/styles";
 import {useState} from "react";
 import convertDocument from "../js/convertDocument.js";
 
-export default function ModalUploadComponent({open, setOpen}) {
+export default function ModalUploadComponent({open, setOpen, onLaunch}) {
 
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -45,6 +45,7 @@ export default function ModalUploadComponent({open, setOpen}) {
     };
     const startAlgo = () => {
         if (uploadSuccess) {
+            onLaunch();
             setOpen(false);
             return;
         }
