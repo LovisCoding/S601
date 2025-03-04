@@ -25,8 +25,6 @@ export default function App() {
         Open max-width dialog
       </Button>
       <ModalUploadComponent open={open} setOpen={setOpenModal} />
-
-
     </React.Fragment>
   );
 }
