@@ -27,6 +27,7 @@ export default function ModalUploadComponent({open, setOpen, onLaunch}) {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [error, setError] = useState(null);
+    const [data, setData] = useState(null);
     const [uploadSuccess, setUploadSuccess] = useState(null);
     const [values, setValues] = useState({
         vehicles: 8,
@@ -45,7 +46,7 @@ export default function ModalUploadComponent({open, setOpen, onLaunch}) {
     };
     const startAlgo = () => {
         if (uploadSuccess) {
-            onLaunch();
+            onLaunch(data);
             setOpen(false);
             return;
         }
@@ -56,6 +57,7 @@ export default function ModalUploadComponent({open, setOpen, onLaunch}) {
         if (event.target.files && event.target.files[0]) {
             setUploadSuccess(true);
             await convertDocument(event.target.files[0]).then((data) => {
+                setData(data);
                 console.log(data);
             }).catch(() => {
                 setError("Le fichier ne peut pas être formaté");

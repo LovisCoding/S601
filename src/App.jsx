@@ -36,8 +36,9 @@ export default function App() {
 		};
 	}, []);
 
-  const handleRunAlgorithm = () => {
-    const result = startSimulatedAnnealing();
+  const handleRunAlgorithm = (data) => {
+	console.log("coucou : " + data)
+    const result = startSimulatedAnnealing(data);
     setGraphData(result);
   };
 
