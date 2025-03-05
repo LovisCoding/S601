@@ -96,7 +96,7 @@ export function startSimulatedAnnealing(data) {
 			textResult += "\n • 🌍 Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
 			if (distanceTotale > 1)
 				textResult += "s"
-            textResult += "\n • Poids utilisée : " + poidsUtilise.toFixed(2);
+            textResult += "\n • 🎯 Poids utilisée : " + poidsUtilise.toFixed(2);
 		}
 		else 
 			textResult += " ❌";
