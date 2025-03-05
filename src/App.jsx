@@ -8,6 +8,8 @@ import GraphComponent from "./components/GraphComponent.jsx";
 import { startSimulatedAnnealing } from "./js/recuitSimule.js";
 import GraphImage from './assets/img/DefaultGraph.png';
 import Icon from './assets/img/RouteSolver.png';
+import { Stack } from '@mui/material';
+import * as dataCantine  from './assets/dataCantine.json';
 
 
  
@@ -21,21 +23,24 @@ export default function App() {
 	const totalPages = 2;
 
 	React.useEffect(() => {
-		const handleScroll = (event) => {
-			event.preventDefault();
-			setPage((prevPage) => {
-				let newPage = event.deltaY > 0 ? prevPage + 1 : prevPage - 1;
-				return Math.max(0, Math.min(totalPages - 1, newPage));
-			});
-		};
-		// handleRunAlgorithm(null);
+		
 
 		window.addEventListener('wheel', handleScroll, { passive: false });
-
+		
+		handleRunAlgorithm(dataCantine);
 		return () => {
 			window.removeEventListener('wheel', handleScroll);
 		};
+		
 	}, []);
+	const handleScroll = (event) => {
+		event.preventDefault();
+		setPage((prevPage) => {
+			let newPage = event.deltaY > 0 ? prevPage + 1 : prevPage - 1;
+			window.removeEventListener('wheel', handleScroll);
+			return Math.max(0, Math.min(totalPages - 1, newPage));
+		});
+	};
 
   const handleRunAlgorithm = (data) => {
     const result = startSimulatedAnnealing(data);
@@ -48,6 +53,7 @@ export default function App() {
 
 	const firstPage = () => {
 		setPage(0);
+		window.addEventListener('wheel', handleScroll, { passive: false });
 	}
 
 	const pageVariants = {
@@ -96,15 +102,23 @@ export default function App() {
 
 				{page === 1 && (
 					<motion.div key="page2" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ position: 'absolute', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-						<Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-							Importer des données
-						</Button>
+						<Stack spacing={3} mt={4} alignItems={"center"}>
+							<Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+								Importer des données
+							</Button>
+							<Box height={'80vh'}>
+							{graphData && <GraphComponent graphData={graphData} />}
+							</Box>
+							
+						</Stack>
+						
+						
 					</motion.div>
 				)}
 			</AnimatePresence>
 
 			<ModalUploadComponent open={open} setOpen={setOpen} onLaunch={handleRunAlgorithm}/>
-			{graphData && <GraphComponent graphData={graphData} />}
+			
 		</Box>
 	);
 }
