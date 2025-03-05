@@ -227,25 +227,19 @@ function perturbSolution(solution) {
                 newSolution[v1].splice(clientIndex, 1);
             }
 
-            let newObjective;
-
             for (let voisin = 0; voisin < nbClients; voisin++) {
                 let newSolution2 = clone(newSolution)
 
                 let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
                 newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
 
-                let newTotalDistance = evaluateSolution(newSolution).totalDistance;
-                let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
-
-                if (newTotalDistance2 < newTotalDistance) {
+                if (evaluateSolution(newSolution2).totalDistance <  evaluateSolution(newSolution).totalDistance) {
                     newSolution = newSolution2;
-                    newObjective = newTotalDistance2
                 }
             }
 
             let objective = evaluateSolution(solution).totalDistance;
-            newObjective = evaluateSolution(newSolution).totalDistance;
+            let newObjective = evaluateSolution(newSolution).totalDistance;
 
             if (newObjective < objective) {
                 solution = newSolution;
