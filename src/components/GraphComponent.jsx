@@ -44,7 +44,7 @@ const GraphComponent = ({ graphData }) => {
 						display: "flex",
 						flexDirection: "column",
 						width: "450px",
-						height: "80%", 
+						height: "50%", 
 						overflowY: "auto",
 						borderRadius: "10px",
 						padding: "10px",

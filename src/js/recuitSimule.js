@@ -39,7 +39,7 @@ export function startSimulatedAnnealing(data) {
 	let alpha = 0.99999; // Augmentation du facteur alpha pour réduire plus rapidement la température
 
 	let TMin = 0.0000001; // Température minimale
-	let maxIterations = 100000; // Nombre d'itérations réduit pour tester des petites instances
+	let maxIterations = 10000; // Nombre d'itérations réduit pour tester des petites instances
 	let minImprovement = 0.001; // Amélioration minimale de la solution avant d'arrêter
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
@@ -61,7 +61,7 @@ export function startSimulatedAnnealing(data) {
 		// Si aucune amélioration importante n'est détectée, on arrête plus tôt
 		if (Math.abs(bestObjective - newObjective) < minImprovement) {
 			noImprovementCounter++;
-			if (noImprovementCounter > 10000) {
+			if (noImprovementCounter > maxIterations/100) {
                 console.log("stagne")
                 break;
             } // Arrêter après 1000 itérations sans amélioration significative
@@ -80,12 +80,14 @@ export function startSimulatedAnnealing(data) {
 		textResult += "\n\nVéhicule " + (v+1) + " : ";
 		var distanceTotale = 0;
 		var currentClient = 0;
+        var poidsUtilise = 0;
 		if (solution[v].length > 0) {
 			textResult += "\n • Dépôt "
 			for (let i = 0; i < solution[v].length; i++) {
 				let nextClient = solution[v][i];
 				textResult += " → C" + (nextClient+1);
 				distanceTotale += matDistanceClient[currentClient][nextClient+1];
+                poidsUtilise += demandesClients[nextClient];
 				currentClient = nextClient+1;
 			}
 
@@ -94,6 +96,7 @@ export function startSimulatedAnnealing(data) {
 			textResult += "\n • Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
 			if (distanceTotale > 1)
 				textResult += "s"
+            textResult += "\n • Poids utilisée : " + poidsUtilise.toFixed(2);
 		}
 		else 
 			textResult += " Pas de déplacement";
@@ -219,15 +222,32 @@ function perturbSolution(solution) {
             let client = newSolution[v1][clientIndex];
 
             if (countPoids(newSolution[v2], client)) {
-                newSolution[v2].push(client);
+                let randClientIndex = Math.floor(Math.random() * newSolution[v2].length);
+                newSolution[v2].splice(randClientIndex, 0, client)
                 newSolution[v1].splice(clientIndex, 1);
-                
             }
 
-            let objective = evaluateSolution(solution);
-            let newObjective = evaluateSolution(newSolution);
+            let newObjective;
 
-            if (newObjective.totalDistance < objective.totalDistance) {
+            for (let voisin = 0; voisin < nbClients; voisin++) {
+                let newSolution2 = clone(newSolution)
+
+                let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
+                newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
+
+                let newTotalDistance = evaluateSolution(newSolution).totalDistance;
+                let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
+
+                if (newTotalDistance2 < newTotalDistance) {
+                    newSolution = newSolution2;
+                    newObjective = newTotalDistance2
+                }
+            }
+
+            let objective = evaluateSolution(solution).totalDistance;
+            newObjective = evaluateSolution(newSolution).totalDistance;
+
+            if (newObjective < objective) {
                 solution = newSolution;
             }
         }
