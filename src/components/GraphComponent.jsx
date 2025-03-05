@@ -15,8 +15,8 @@ const GraphComponent = ({ graphData }) => {
             label: node.label,
             font: { color: "#000", size: 18, vadjust: 0 }, // Centrer le texte
             color: { border: "#000", highlight: { border: "#000" } },
-            shape: "circle", // Mettre la bulle bien ronde
-            size: 25
+            shape: "circle", // Image pour le dépôt, cercle sinon
+            size: node.label == "Dépôt" ? 50 : 25, // Plus gros si c'est le dépôt
         })));
 
         const edges = new DataSet(filteredEdges.map(edge => ({

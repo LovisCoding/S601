@@ -28,6 +28,7 @@ export default function App() {
 				return Math.max(0, Math.min(totalPages - 1, newPage));
 			});
 		};
+		// handleRunAlgorithm(null);
 
 		window.addEventListener('wheel', handleScroll, { passive: false });
 
@@ -37,7 +38,6 @@ export default function App() {
 	}, []);
 
   const handleRunAlgorithm = (data) => {
-	console.log("coucou : " + data)
     const result = startSimulatedAnnealing(data);
     setGraphData(result);
   };
