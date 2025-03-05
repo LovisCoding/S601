@@ -215,19 +215,13 @@ function perturbSolution(solution) {
         let v2 = Math.floor(Math.random() * nbVehicules);
     
         if (v1 !== v2 && newSolution[v1].length > 0) {
-            // let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
-            // let client = newSolution[v1].splice(clientIndex, 1)[0];
-            // newSolution[v2].push(client);
-
-            // let objective = evaluateSolution(solution);
-            // let newObjective = evaluateSolution(newSolution);
-
             let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
             let client = newSolution[v1][clientIndex];
 
             if (countPoids(newSolution[v2], client)) {
                 newSolution[v2].push(client);
                 newSolution[v1].splice(clientIndex, 1);
+                
             }
 
             let objective = evaluateSolution(solution);
