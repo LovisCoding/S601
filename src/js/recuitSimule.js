@@ -66,11 +66,11 @@ export function startSimulatedAnnealing(data) {
 
 	var textResult = "Solution optimale avec objectif " + bestObjective.toFixed(2) + " kilomètres";
 	for (let v = 0; v < nbVehicules; v++) {
-		textResult += "\n\nVéhicule " + (v+1) + " : ";
+		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		var distanceTotale = 0;
 		var currentClient = 0;
 		if (bestSolution[v].length > 0) {
-			textResult += "\n • Dépôt "
+			textResult += "\n • 🏡 Dépôt "
 			for (let i = 0; i < bestSolution[v].length; i++) {
 				let nextClient = bestSolution[v][i];
 				textResult += " → C" + (nextClient+1);
@@ -80,12 +80,12 @@ export function startSimulatedAnnealing(data) {
 
 			distanceTotale += matDistanceClient[currentClient][0];
 			textResult += " → Dépôt";
-			textResult += "\n • Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
+			textResult += "\n • 🌍 Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
 			if (distanceTotale > 1)
 				textResult += "s"
 		}
 		else 
-			textResult += " Pas de déplacement";
+			textResult += " ❌";
 	}
 
 	let graphData = generateGraphData(bestSolution);
