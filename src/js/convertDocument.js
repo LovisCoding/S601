@@ -14,21 +14,33 @@ export default function convertDocument(file) {
                     customers.push({ id, x, y, demand });
                 }
 
-                let dist = Array(numCustomers).fill().map(() => Array(numCustomers).fill(0));
+                let dist = Array(numCustomers + 1).fill().map(() => Array(numCustomers + 1).fill(0));
+
+                // Calculer les distances entre le point (0, 0) et chaque client
+                for (let i = 0; i < numCustomers; i++) {
+                    let x1 = 0; // Le point (0, 0)
+                    let y1 = 0;
+                    let x2 = customers[i].x;
+                    let y2 = customers[i].y;
+                    dist[0][i + 1] = parseFloat(Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2).toFixed(1)); // Distance entre (0,0) et le client i
+                    dist[i + 1][0] = dist[0][i + 1]; // Remplir la colonne symÃ©trique
+                }
+
+                // Calculer les distances entre les clients
                 for (let i = 0; i < numCustomers; i++) {
                     for (let j = 0; j < numCustomers; j++) {
                         let x1 = customers[i].x;
                         let y1 = customers[i].y;
                         let x2 = customers[j].x;
                         let y2 = customers[j].y;
-                        dist[i][j] = parseFloat(Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2).toFixed(1));
+                        dist[i + 1][j + 1] = parseFloat(Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2).toFixed(1)); // Distance entre client i et client j
                     }
                 }
 
                 const jsonData = {
                     quantiteMax: vehicleCapacity,
-                    nbVehicules: 4,
-                    nbClients: numCustomers + 1,
+                    nbVehicules: 25,
+                    nbClients: numCustomers,
                     demandesClients: customers.map(c => c.demand),
                     matDistanceClient: dist
                 };

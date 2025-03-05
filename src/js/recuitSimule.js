@@ -17,21 +17,31 @@ let matDistanceClient = [
 	[4.7, 3, 1.4, 3.2, 4.1, 2.6, 7.6, 4.3, 2.8, 2.8, 0]
 ];
 
+
 // Recuit simulé
-export function startSimulatedAnnealing() {
+export function startSimulatedAnnealing(data) {
+	nbVehicules = data.nbVehicules;
+	nbClients = data.nbClients;
+	capaciteVehicule = data.quantiteMax;
+	demandesClients = data.demandesClients;
+	matDistanceClient = data.matDistanceClient;
+
 	// Initialisation de la solution initiale (aléatoire)
+	
 	let solution = initializeSolution();
+	console.log('je penetre')
 	let bestSolution = solution;
 	let bestObjective = evaluateSolution(solution).totalDistance;
 	let bestCapacityExceeded = false;
 	
-	let T = 100000; // Température initiale
-	let TMin = 0.00001; // Température minimale
-	let alpha = 0.999995; // Facteur de réduction de température
-	let maxIterations = 2000000; // Nombre d'itérations
+	let T = 10000000; // Température initiale
+	let TMin = 0.0000001; // Température minimale
+	let alpha = 0.99999995; // Facteur de réduction de température
+	let maxIterations = 500000; // Nombre d'itérations
 
 	// Recuit simulé
 	for (let iter = 0; iter < maxIterations; iter++) {
+		if (iter % 1000000 === 0) console.log(`Iteration ${iter} - Température: ${T.toFixed(5)}`);
 		if (T < TMin) break;
 
 		let newSolution = perturbSolution(solution);
@@ -127,7 +137,6 @@ function evaluateSolution(solution) {
 function initializeSolution() {
 	let solution = [];
 	let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
-
 	// Distribution aléatoire des clients parmi les véhicules
 	for (let v = 0; v < nbVehicules; v++) {
 		solution[v] = [];
@@ -138,9 +147,11 @@ function initializeSolution() {
 		let randomClientIndex = Math.floor(Math.random() * clients.length);
 		let client = clients[randomClientIndex];
 		let randomVehicle = Math.floor(Math.random() * nbVehicules);
-		
+		console.log("nb clients : " + clients.length)
+		console.log(client)
 		// Vérification de la capacité du véhicule avant d'ajouter un client
 		if (countPoids(solution[randomVehicle], client)) {
+			
 			solution[randomVehicle].push(client);
 			clients.splice(randomClientIndex, 1);
 		}
