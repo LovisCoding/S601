@@ -1,3 +1,5 @@
+import { clone } from "chart.js/helpers";
+
 let nbVehicules = 4;   // Nombre de véhicules
 let nbClients = 10;     // Nombre de clients
 let capaciteVehicule = 100; // Capacité maximale de chaque véhicule (en termes de poids ou de colis)
@@ -20,61 +22,72 @@ let matDistanceClient = [
 
 // Recuit simulé
 export function startSimulatedAnnealing(data) {
-	nbVehicules = data.nbVehicules;
-	nbClients = data.nbClients;
-	capaciteVehicule = data.quantiteMax;
-	demandesClients = data.demandesClients;
-	matDistanceClient = data.matDistanceClient;
+	if (data != null) {
+		nbVehicules = data.nbVehicules;
+		nbClients = data.nbClients;
+		capaciteVehicule = data.quantiteMax;
+		demandesClients = data.demandesClients;
+		matDistanceClient = data.matDistanceClient;
+	}
+
 
 	// Initialisation de la solution initiale (aléatoire)
 	
 	let solution = initializeSolution();
-	console.log('je penetre')
-	let bestSolution = solution;
-	let bestObjective = evaluateSolution(solution).totalDistance;
-	let bestCapacityExceeded = false;
 	
-	let T = 10000000; // Température initiale
+	let T = 100000; // Température initiale réduite
+	let alpha = 0.99999; // Augmentation du facteur alpha pour réduire plus rapidement la température
+
 	let TMin = 0.0000001; // Température minimale
-	let alpha = 0.99999995; // Facteur de réduction de température
-	let maxIterations = 500000; // Nombre d'itérations
-
-	// Recuit simulé
+	let maxIterations = 10000; // Nombre d'itérations réduit pour tester des petites instances
+	let minImprovement = 0.001; // Amélioration minimale de la solution avant d'arrêter
+	let bestObjective = Infinity;
+	let noImprovementCounter = 0;
+	
+	// Dans la boucle du recuit simulé
 	for (let iter = 0; iter < maxIterations; iter++) {
-		if (iter % 1000000 === 0) console.log(`Iteration ${iter} - Température: ${T.toFixed(5)}`);
 		if (T < TMin) break;
-
+	
 		let newSolution = perturbSolution(solution);
-		let currentObjective = evaluateSolution(solution).totalDistance;
-		let newObjective = evaluateSolution(newSolution).totalDistance;
-		// let currentCapacityExceeded = evaluateSolution(solution).capacityExceeded;
-		let newCapacityExceeded = evaluateSolution(newSolution).capacityExceeded;
 
-		// On accepte la nouvelle solution si elle est meilleure ou si la condition de température est remplie
-		if ((newObjective < currentObjective && !newCapacityExceeded) || Math.random() < Math.exp((currentObjective - newObjective) / T)) {
-			solution = newSolution;
+        let newObjective = evaluateSolution(newSolution).totalDistance;
+	
+		if (newObjective < bestObjective) {
+            bestObjective = newObjective;
+			solution = clone(newSolution);
+			noImprovementCounter = 0;
+		} 
+	
+		// Si aucune amélioration importante n'est détectée, on arrête plus tôt
+		if (Math.abs(bestObjective - newObjective) < minImprovement) {
+			noImprovementCounter++;
+			if (noImprovementCounter > maxIterations/100) {
+                console.log("stagne")
+                break;
+            } // Arrêter après 1000 itérations sans amélioration significative
 		}
-
-		if (newObjective < bestObjective && !newCapacityExceeded) {
-			bestSolution = newSolution;
-			bestObjective = newObjective;
-			bestCapacityExceeded = newCapacityExceeded;
-		}
-
+	
 		T *= alpha; // Réduction de la température
+
+		if (iter % 10000 == 0) console.log("iter : " + iter)
 	}
+
+	console.log("T : " + T)
+	
 
 	var textResult = "Solution optimale avec objectif " + bestObjective.toFixed(2) + " kilomètres";
 	for (let v = 0; v < nbVehicules; v++) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		var distanceTotale = 0;
 		var currentClient = 0;
-		if (bestSolution[v].length > 0) {
+        var poidsUtilise = 0;
+		if (solution[v].length > 0) {
 			textResult += "\n • 🏡 Dépôt "
-			for (let i = 0; i < bestSolution[v].length; i++) {
-				let nextClient = bestSolution[v][i];
+			for (let i = 0; i < solution[v].length; i++) {
+				let nextClient = solution[v][i];
 				textResult += " → C" + (nextClient+1);
 				distanceTotale += matDistanceClient[currentClient][nextClient+1];
+                poidsUtilise += demandesClients[nextClient];
 				currentClient = nextClient+1;
 			}
 
@@ -83,110 +96,168 @@ export function startSimulatedAnnealing(data) {
 			textResult += "\n • 🌍 Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
 			if (distanceTotale > 1)
 				textResult += "s"
+            textResult += "\n • Poids utilisée : " + poidsUtilise.toFixed(2);
 		}
 		else 
 			textResult += " ❌";
 	}
 
-	let graphData = generateGraphData(bestSolution);
+    console.log(evaluateSolution(solution, false).totalDistance)
+
+	let graphData = generateGraphData(solution);
 	graphData.textResult = textResult;
 	return { ...graphData};
 }
 
 
- // Fonction pour évaluer la solution courante
-function evaluateSolution(solution) {
-	let totalDistance = 0;
-	let capacityExceeded = false;
+// Fonction pour évaluer la solution courante
+function evaluateSolution(solution, log = false) {
+    let totalDistance = 0;
+    let capacityExceeded = false;
 
-	// On parcourt chaque véhicule et son parcours
-	for (let v = 0; v < nbVehicules; v++) {
-		let distanceTotale = 0;
-		let currentClient = 0; // Le véhicule commence au dépôt
-		let currentLoad = 0; // Charge actuelle du véhicule
+    // On parcourt chaque véhicule et son parcours
+    for (let v = 0; v < nbVehicules; v++) {
+        let distanceTotale = 0;
+        let currentClient = 0; // Le véhicule commence au dépôt
+        let currentLoad = 0; // Charge actuelle du véhicule
 
-		// Si le véhicule a des clients assignés, on calcule la distance
-		if (solution[v].length > 0) {
-			for (let i = 0; i < solution[v].length; i++) {
-				let nextClient = solution[v][i];
-				distanceTotale += matDistanceClient[currentClient][nextClient+1];
-				currentLoad += demandesClients[nextClient];
+        // Si le véhicule a des clients assignés, on calcule la distance
+        if (solution[v] != null && solution[v].length > 0) {
+            for (let i = 0; i < solution[v].length; i++) {
+                let nextClient = solution[v][i];
+                if (log)
+                    console.log(matDistanceClient[currentClient][nextClient+1])
+                distanceTotale += matDistanceClient[currentClient][nextClient+1];
+                currentLoad += demandesClients[nextClient];
 
-				if (currentLoad > capaciteVehicule) {
-					capacityExceeded = true; // Si on dépasse la capacité, on marque cette contrainte
-					break;
-				}
+                if (currentLoad > capaciteVehicule) {
+                    capacityExceeded = true; // Si on dépasse la capacité, on marque cette contrainte
+                    break;
+                }
 
-				currentClient = nextClient+1;
-			}
+                currentClient = nextClient+1;
+            }
 
-			// Retour au dépôt après avoir livré tous les clients
-			if (!capacityExceeded) {
-				distanceTotale += matDistanceClient[currentClient][0]; // Retour au dépôt
-			}
-		}
+            distanceTotale += matDistanceClient[currentClient][0];
 
-		totalDistance += distanceTotale;
-	}
+            if (log)
+                console.log("v" + v + " : " + distanceTotale);
+        }
 
-	return { totalDistance, capacityExceeded };
+        totalDistance += distanceTotale;
+    }
+
+    return { totalDistance, capacityExceeded };
 }
 
 
-// Initialisation aléatoire d'une solution
+// Initialisation avec une méthode gloutonne randomisée
 function initializeSolution() {
-	let solution = [];
-	let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
-	// Distribution aléatoire des clients parmi les véhicules
-	for (let v = 0; v < nbVehicules; v++) {
-		solution[v] = [];
-	}
+    let solution = [];
+    let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
+    // Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
+    for (let v = 0; v < nbVehicules; v++) {
+        solution[v] = [];
+    }
 
-	// Distribution des clients parmi les véhicules de façon aléatoire
-	while (clients.length > 0) {
-		let randomClientIndex = Math.floor(Math.random() * clients.length);
-		let client = clients[randomClientIndex];
-		let randomVehicle = Math.floor(Math.random() * nbVehicules);
-		console.log("nb clients : " + clients.length)
-		console.log(client)
-		// Vérification de la capacité du véhicule avant d'ajouter un client
-		if (countPoids(solution[randomVehicle], client)) {
-			
-			solution[randomVehicle].push(client);
-			clients.splice(randomClientIndex, 1);
-		}
-	}
+    // Mélanger les clients pour introduire de la randomisation avant la distribution
+    clients = shuffleArray(clients);
 
-	return solution;
+    clients.forEach(client => {
+        let minLoadVehicle = -1;
+        let minLoad = Number.MAX_VALUE;
+        // Trouver le véhicule avec la charge la plus faible et qui respecte la capacité
+        for (let v = 0; v < nbVehicules; v++) {
+            let currentLoad = solution[v].reduce((sum, c) => sum + demandesClients[c], 0);
+            if (currentLoad + demandesClients[client] <= capaciteVehicule && currentLoad < minLoad) {
+                minLoadVehicle = v;
+                minLoad = currentLoad;
+            }
+        }
+
+        // Ajouter le client au véhicule avec la charge la plus faible
+        if (minLoadVehicle !== -1) {
+            solution[minLoadVehicle].push(client);
+        }
+    });
+
+    return solution;
 }
+
+// Fonction de mélange aléatoire pour la randomisation
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
 
 // Fonction pour vérifier si la capacité du véhicule est dépassée
-function countPoids(solution, client) {
+function countPoids(vehicule, client) {
 	let total = 0;
 	// Calcul de la charge actuelle du véhicule
-	for(let s = 0; s < solution.length; s++) {
-		total += demandesClients[solution[s]];
+	for(let s = 0; s < vehicule.length; s++) {
+		total += demandesClients[vehicule[s]];
 	}
 
 	// Ajout du poids du client courant
-	total += demandesClients[client];
+	if (client != null)
+		total += demandesClients[client];
 	return total <= capaciteVehicule; // Retourne true si la capacité est respectée
 }
 
-// Perturbation de la solution (échange aléatoire de clients entre deux véhicules)
+
 function perturbSolution(solution) {
-	let newSolution = JSON.parse(JSON.stringify(solution));
-	let v1 = Math.floor(Math.random() * nbVehicules);
-	let v2 = Math.floor(Math.random() * nbVehicules);
+    for (let voisin = 0; voisin < nbClients; voisin++) {
+        let newSolution = clone(solution)
 
-	if (v1 !== v2 && newSolution[v1].length > 0) {
-		let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
-		let client = newSolution[v1].splice(clientIndex, 1)[0];
-		newSolution[v2].push(client);
-	}
+        let v1 = Math.floor(Math.random() * nbVehicules);
+        let v2 = Math.floor(Math.random() * nbVehicules);
+    
+        if (v1 !== v2 && newSolution[v1].length > 0) {
+            let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
+            let client = newSolution[v1][clientIndex];
 
-	return newSolution;
+            if (countPoids(newSolution[v2], client)) {
+                let randClientIndex = Math.floor(Math.random() * newSolution[v2].length);
+                newSolution[v2].splice(randClientIndex, 0, client)
+                newSolution[v1].splice(clientIndex, 1);
+            }
+
+            let newObjective;
+
+            for (let voisin = 0; voisin < nbClients; voisin++) {
+                let newSolution2 = clone(newSolution)
+
+                let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
+                newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
+
+                let newTotalDistance = evaluateSolution(newSolution).totalDistance;
+                let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
+
+                if (newTotalDistance2 < newTotalDistance) {
+                    newSolution = newSolution2;
+                    newObjective = newTotalDistance2
+                }
+            }
+
+            let objective = evaluateSolution(solution).totalDistance;
+            newObjective = evaluateSolution(newSolution).totalDistance;
+
+            if (newObjective < objective) {
+                solution = newSolution;
+            }
+        }
+    
+    }
+
+    return solution;
 }
+
+
 
 function generateGraphData(solution) {
     let nodes = [{ id: 0, label: "Dépôt", color: "red" }];
