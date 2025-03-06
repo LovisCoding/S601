@@ -68,6 +68,17 @@ export function startSimulatedAnnealing(data) {
 		return {...graphData};
 	}
 
+    if (TMin > T) {
+		graphData.textResult = "La témpature minimale doit être supérieur à la température initiale";
+		return {...graphData};
+	}
+
+
+    if (alpha >= 1 || alpha <= 0) {
+		graphData.textResult = "La réduction de température doit être comprise entre 0 et 1 non inclus";
+		return {...graphData};
+	}
+
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
 	let iterUtilisee = maxIterations;
