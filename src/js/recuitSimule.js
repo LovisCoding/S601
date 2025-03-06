@@ -226,12 +226,22 @@ function perturbSolution(solution, temperature) {
                 newSolution[v1].splice(clientIndex, 1);
             }
 
+            let newObjective = evaluateSolution(newSolution).totalDistance;
+
+
+            let newSolutionShuffle = clone(newSolution)
             // Ajouter une légère perturbation (shuffle d'un véhicule)
             let vehiculeIndex = Math.floor(Math.random() * nbVehicules);
-            newSolution[vehiculeIndex] = shuffleArray(newSolution[vehiculeIndex]);
+            newSolutionShuffle[vehiculeIndex] = shuffleArray(newSolutionShuffle[vehiculeIndex]);
 
+            let newShuffleObjective = evaluateSolution(newSolutionShuffle).totalDistance;
+
+            if (newShuffleObjective < newObjective) {
+                newSolution = newSolutionShuffle;
+                newObjective = newShuffleObjective;
+            }
+                
             // Évaluation
-            let newObjective = evaluateSolution(newSolution).totalDistance;
             let delta = newObjective - bestObjective;
 
             // 🌡️ **Règle d'acceptation du recuit simulé**
