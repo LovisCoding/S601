@@ -156,8 +156,6 @@ function initializeSolution() {
     let solution = [];
     let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
 
-    console.log("clients : " + clients.length)
-
     // Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
     for (let v = 0; v < nbVehicules; v++) {
         solution[v] = [];
@@ -167,9 +165,7 @@ function initializeSolution() {
     clients = shuffleArray(clients);
 
     clients.forEach(client => {
-        let minLoadVehicle = -1;
-        let minLoad = Number.MAX_VALUE;
-        // Trouver le véhicule avec la charge la plus faible et qui respecte la capacité
+        // Attribuer les clients aux premiers véhicules non remplis
         for (let v = 0; v < nbVehicules; v++) {
             if (countPoids(solution[v], client)) {
                 solution[v].push(client);
@@ -177,14 +173,6 @@ function initializeSolution() {
             }
         }
     });
-
-        
-    let t = 0
-    for (let i = 0; i < nbVehicules; i++) {
-        t += solution[i].length
-    }
-
-    console.log("avant : " + t)
 
     return solution;
 }
@@ -229,9 +217,6 @@ function perturbSolution(solution, temperature) {
         if (v1 !== v2 && newSolution[v1].length > 0) {
             let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
 
-            let t1 = newSolution[v1].length
-            let t2 = newSolution[v2].length
-
             let client = newSolution[v1][clientIndex];
 
             // Vérifier si le véhicule v2 peut accueillir ce client
@@ -239,17 +224,6 @@ function perturbSolution(solution, temperature) {
                 let randClientIndex = Math.floor(Math.random() * (newSolution[v2].length + 1));
                 newSolution[v2].splice(randClientIndex, 0, client);
                 newSolution[v1].splice(clientIndex, 1);
-            }
-
-
-            let t3 = newSolution[v1].length
-            let t4 = newSolution[v2].length
-
-            if (t3+t4 != t1+t2) {
-                console.log(" t1 " + t1)
-                console.log(" t2 " + t2)
-                console.log(" t3 " + t3)
-                console.log(" t4 " + t4)
             }
 
             // Ajouter une légère perturbation (shuffle d'un véhicule)
@@ -268,12 +242,6 @@ function perturbSolution(solution, temperature) {
         }
     }
     
-    let t = 0
-    for (let i = 0; i < nbVehicules; i++) {
-        t += bestSolution[i].length
-    }
-
-    console.log("t : " + t)
 
     return bestSolution;
 }
