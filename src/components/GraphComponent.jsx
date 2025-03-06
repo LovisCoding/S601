@@ -18,34 +18,43 @@ const GraphComponent = ({ graphData }) => {
             label: node.label,
             font: { 
                 color: "#000", 
-                size: node.fontSize ,// 🔥 Taille du texte augmentée
-                vadjust: 0 // 🔥 Légère correction pour un meilleur centrage
+                size: node.fontSize ,// Taille du texte augmentée
+                vadjust: 0 // Légère correction pour un meilleur centrage
             },
             color: { 
                 border: node.color, 
-                background: '#FFF', // 🔥 Couleur différente pour le dépôt (facultatif)
+                background: '#FFF', // Couleur différente pour le dépôt (facultatif)
                 highlight: { border: "#000" } 
             },
             shape: "circle",
-            size: node.nodeSize, // 🔥 Taille du dépôt plus grande (100 plutôt que 200 pour éviter trop de vide)
-            heightConstraint: { minimum: node.nodeSize, valign: "middle" }, // 🔥 Ajustement de la hauteur pour forcer le centrage
-            widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, // 🔥 Ajustement de la largeur
+            size: node.nodeSize, // Taille du dépôt plus grande (100 plutôt que 200 pour éviter trop de vide)
+            heightConstraint: { minimum: node.nodeSize, valign: "middle" }, //  Ajustement de la hauteur pour forcer le centrage
+            widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, 
         })));
         
-
-        const edges = new DataSet(filteredEdges.map(edge => ({
+        console.log(((filteredEdges[0].edgeSize *100 )/ (graphData.maxDistance)));
+        
+        console.log(filteredEdges[0], graphData.maxDistance, typeof graphData.maxDistance, filteredEdges[0].edgeSize/ graphData.maxDistance);
+        
+        const edges = new DataSet(filteredEdges.map(edge => {
+            console.log(graphData.maxDistance, edge.edgeSize, );
+            
+            return ({
             from: edge.from,
             to: edge.to,
             label: edge.label.toString(),
             arrows: 'to',
             font: { align: "middle", color: "#000", size: 14 },
-            color: edge.color, // Couleur aléatoire pour chaque arête
-            length: edge.edgeSize
-        })));
+            color: edge.color,
+            length: ((edge.edgeSize *200 ) / (graphData.maxDistance))
+            
+        })}));
+    
+        
 
         const networkData = { nodes, edges };
         const options = {
-            edges: { color: "#000000" },
+            edges: { color: "#000000", font: {align: 'middle'} },
             nodes: { shape: "circle" },
             autoResize: false,
         };

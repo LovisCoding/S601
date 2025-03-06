@@ -44,6 +44,7 @@ export function startSimulatedAnnealing(data) {
     let graphData = {};
     graphData.edges = [];
     graphData.nodes = [];
+	graphData.maxDistance = 0;
     let totalDemande = 0
     for (let iDemande = 0; iDemande < demandesClients.length; iDemande++) {
         totalDemande += demandesClients[iDemande];
@@ -129,7 +130,7 @@ export function startSimulatedAnnealing(data) {
 		let currentClient = 0;
 		let poidsUtilise = 0;
 		if (solution[v].length > 0) {
-			textResult += "\n • 🏡 Dépôt "
+			textResult += "\n • 🏭 Dépôt "
 			for (let i = 0; i < solution[v].length; i++) {
 				let nextClient = solution[v][i];
 				textResult += " → C" + (nextClient+1);
@@ -301,8 +302,9 @@ function perturbSolution(solution, temperature) {
 
 
 function generateGraphData(solution) {
-	let nodes = [{ id: 0, label: "Dépôt", color: "red", fontSize: 35, nodeSize: 100, widthConstraint:100 }];
+	let nodes = [{ id: 0, label: "🏭", color: "red", fontSize: 35, nodeSize: 100, widthConstraint:100 }];
 	let edges = [];
+	let maxDistance = 0;
 
 	solution.forEach(route => {
 		let color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -312,17 +314,21 @@ function generateGraphData(solution) {
 			let nodeId = client+1;
 
 			if (!nodes.find(n => n.id === nodeId)) {
-				nodes.push({ id: nodeId, label: `C${nodeId}`, color: color, fontSize: 18, nodeSize: 25, widthConstraint:50 });
+				nodes.push({ id: nodeId, label: `👨🏻‍💼${nodeId}`, color: color, fontSize: 18, nodeSize: 25, widthConstraint:50 });
 			}
 
 			if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
+				
 				edges.push({
 					from: prevNode,
 					to: nodeId,
 					label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`,
                     color: color,
-					edgeSize: matDistanceClient[prevNode][nodeId] * 10
+					edgeSize: matDistanceClient[prevNode][nodeId]
 				});
+				if (matDistanceClient[prevNode][nodeId] > maxDistance) {
+					maxDistance = matDistanceClient[prevNode][nodeId];
+				}
 			} else {
 				console.warn(`Index out of bounds: prevNode=${prevNode}, nodeId=${nodeId}`);
 			}
@@ -335,10 +341,12 @@ function generateGraphData(solution) {
 			edges.push({
 				from: prevNode,
 				to: 0,
-				label: `${matDistanceClient[prevNode][0].toFixed(1)} km`
+				label: `${matDistanceClient[prevNode][0].toFixed(1)} km`,
+				edgeSize: matDistanceClient[prevNode][0],
+				color: color
 			});
 		}
 	});
 
-	return { nodes, edges };
+	return { nodes, edges, maxDistance };
 }
