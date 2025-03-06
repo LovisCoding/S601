@@ -12,7 +12,7 @@ const GraphComponent = ({ graphData }) => {
     useEffect(() => {
         if (!graphData) return;
 
-        const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
+		const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
 
         const nodes = new DataSet(graphData.nodes.map(node => ({
             id: node.id,
