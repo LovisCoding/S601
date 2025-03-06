@@ -7,8 +7,6 @@ const GraphComponent = ({ graphData }) => {
     const [open, setOpen] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);
 
-    console.log(graphData.nodes);
-
     useEffect(() => {
         if (!graphData) return;
 
@@ -31,13 +29,11 @@ const GraphComponent = ({ graphData }) => {
             size: node.nodeSize, // Taille du dépôt plus grande
             heightConstraint: { minimum: node.nodeSize, valign: "middle" },
             widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, 
+            vehicle: node.vehicle,
+            ask: node.ask,
         })));
-        
-        console.log(((filteredEdges[0].edgeSize * 100) / (graphData.maxDistance)));
-        console.log(filteredEdges[0], graphData.maxDistance, typeof graphData.maxDistance, filteredEdges[0].edgeSize / graphData.maxDistance);
-        
+                
         const edges = new DataSet(filteredEdges.map(edge => {
-            console.log(graphData.maxDistance, edge.edgeSize);
             return ({
                 from: edge.from,
                 to: edge.to,
@@ -62,7 +58,9 @@ const GraphComponent = ({ graphData }) => {
         network.on("click", (params) => {
             if (params.nodes.length) {
                 const nodeId = params.nodes[0];
+                if (nodeId == 0) return;
                 const nodeData = nodes.get(nodeId);
+                console.log(nodeData)
                 setSelectedNode(nodeData);
                 setOpen(true);
             }
@@ -75,7 +73,7 @@ const GraphComponent = ({ graphData }) => {
 
     return (
         <Box display="flex" width="100%" height="80vh" position="relative">
-            <Box display="flex" flexDirection="column" width="450px" height="80%" overflow="auto" padding={2}>
+            <Box display="flex" flexDirection="column" width="450px" height="100%" overflow="auto" padding={2}>
                 <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
                 <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
                     {graphData.textResult}
@@ -90,12 +88,11 @@ const GraphComponent = ({ graphData }) => {
                     {selectedNode ? (
                         <>
                             <DialogContentText>
-                                <strong>ID :</strong> {selectedNode.id}
+                                <strong>Véhicule :</strong> {selectedNode.vehicle}
                             </DialogContentText>
                             <DialogContentText>
-                                <strong>Label :</strong> {selectedNode.label}
+                                <strong>Demandes :</strong> {selectedNode.ask}
                             </DialogContentText>
-                            {/* Ajoutez d'autres informations ici si nécessaire */}
                         </>
                     ) : (
                         <DialogContentText>Aucun détail disponible.</DialogContentText>

@@ -141,7 +141,7 @@ export function startSimulatedAnnealing(data) {
 	}
 	textResult += "\n • 🛑 Raison de l'arrêt : " + raisonFin;
 	textResult += "\n • 🔄 Itérations utilisées : " + iterUtilisee;
-	textResult += "\n • 🌡️ Température atteinte : " + T + "/" + TMin;
+	textResult += "\n • 🌡️ Température atteinte : " + T.toFixed(2) + "/" + TMin;
 	textResult += "\n\n 🗺️ Trajets : ";
 
     textResult += getVehicleDetails(solution)
@@ -325,11 +325,12 @@ function perturbSolution(solution, temperature) {
 // Générer les données pour le graphique
 
 function generateGraphData(solution) {
-	let nodes = [{ id: 0, label: "🏭", color: "red", fontSize: 35, nodeSize: 100, widthConstraint:100 }];
+	let nodes = [{ id: 0, label: "🏭", color: "red", fontSize: 35, nodeSize: 100, widthConstraint:100}];
 	let edges = [];
 	let maxDistance = 0;
-
+    let idVehicle = 0;
 	solution.forEach(route => {
+        idVehicle ++;
 		let color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 		let prevNode = 0; // Dépôt
 
@@ -337,7 +338,16 @@ function generateGraphData(solution) {
 			let nodeId = client+1;
 
 			if (!nodes.find(n => n.id === nodeId)) {
-				nodes.push({ id: nodeId, label: `👨🏻‍💼${nodeId}`, color: color, fontSize: 18, nodeSize: 25, widthConstraint:50 });
+				nodes.push({ 
+                    id: nodeId, 
+                    label: `👨🏻‍💼${nodeId}`, 
+                    color: color, 
+                    fontSize: 18, 
+                    nodeSize: 25, 
+                    widthConstraint:50,
+                    vehicle:idVehicle,
+                    ask:demandesClients[nodeId-1] 
+                });
 			}
 
 			if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
