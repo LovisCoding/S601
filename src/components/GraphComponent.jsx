@@ -39,7 +39,8 @@ const GraphComponent = ({ graphData }) => {
             label: edge.label.toString(),
             arrows: 'to',
             font: { align: "middle", color: "#000", size: 14 },
-            color: edge.color // Couleur aléatoire pour chaque arête
+            color: edge.color, // Couleur aléatoire pour chaque arête
+            length: edge.edgeSize
         })));
 
         const networkData = { nodes, edges };

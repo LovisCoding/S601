@@ -305,10 +305,10 @@ function generateGraphData(solution) {
 	let edges = [];
 
 	solution.forEach(route => {
+		let color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 		let prevNode = 0; // Dépôt
 
 		route.forEach(client => {
-            let color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 			let nodeId = client+1;
 
 			if (!nodes.find(n => n.id === nodeId)) {
@@ -320,7 +320,8 @@ function generateGraphData(solution) {
 					from: prevNode,
 					to: nodeId,
 					label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`,
-                    color: color
+                    color: color,
+					edgeSize: matDistanceClient[prevNode][nodeId] * 10
 				});
 			} else {
 				console.warn(`Index out of bounds: prevNode=${prevNode}, nodeId=${nodeId}`);
