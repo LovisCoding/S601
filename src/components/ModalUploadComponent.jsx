@@ -55,13 +55,25 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 		setOpen(false);
 	};
 
+
     const startAlgo = async () => {
         if (uploadSuccess) {
             setLoading(true);
+            const algoData = {
+				nbVehicules: values.vehicles,
+				nbClients: data.demandesClients.length,
+				quantiteMax: values.vehicles,
+				demandesClients: data.demandesClients,
+				matDistanceClient: data.matDistanceClient,
+				tempMin: values.tempMin,
+				tempInit: values.tempInit,
+				tempFactor: values.tempFactor,
+				iterations: values.iterations
+			};
             try {
                 await new Promise((resolve) => {
                     setTimeout(async () => {
-                        await onLaunch(data);
+                        await onLaunch(algoData);
                         setLoading(false);
                         setOpen(false);
                         resolve();
@@ -75,7 +87,6 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
         }
         setUploadSuccess(false);
     };
-
 
 	const uploadDocument = async (event) => {
 		if (event.target.files && event.target.files[0]) {

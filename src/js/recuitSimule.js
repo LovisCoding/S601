@@ -30,30 +30,24 @@ export function startSimulatedAnnealing(data) {
 		matDistanceClient = data.matDistanceClient;
 	}
 
-
-	// Initialisation de la solution initiale (aléatoire)
-	
 	let solution = initializeSolution();
-	
-	let T = 100000; // Température initiale réduite
-	let alpha = 0.99999; // Augmentation du facteur alpha pour réduire plus rapidement la température
-
-	let TMin = 0.0000001; // Température minimale
-	let maxIterations = 10000; // Nombre d'itérations réduit pour tester des petites instances
-	let minImprovement = 0.001; // Amélioration minimale de la solution avant d'arrêter
+	let T = data.tempInit || 100000;
+	let alpha = data.tempFactor || 0.99999;
+	let TMin = data.tempMin || 0.0000001;
+	let maxIterations = data.iterations || 10000;
+	let minImprovement = 0.001;
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
 	
-	// Dans la boucle du recuit simulé
 	for (let iter = 0; iter < maxIterations; iter++) {
 		if (T < TMin) break;
 	
 		let newSolution = perturbSolution(solution);
 
-        let newObjective = evaluateSolution(newSolution).totalDistance;
+		let newObjective = evaluateSolution(newSolution).totalDistance;
 	
 		if (newObjective < bestObjective) {
-            bestObjective = newObjective;
+			bestObjective = newObjective;
 			solution = clone(newSolution);
 			noImprovementCounter = 0;
 		} 
@@ -62,9 +56,9 @@ export function startSimulatedAnnealing(data) {
 		if (Math.abs(bestObjective - newObjective) < minImprovement) {
 			noImprovementCounter++;
 			if (noImprovementCounter > maxIterations/100) {
-                console.log("stagne")
-                break;
-            } // Arrêter après 1000 itérations sans amélioration significative
+				console.log("stagne")
+				break;
+			} // Arrêter après 1000 itérations sans amélioration significative
 		}
 	
 		T *= alpha; // Réduction de la température
@@ -80,14 +74,14 @@ export function startSimulatedAnnealing(data) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		var distanceTotale = 0;
 		var currentClient = 0;
-        var poidsUtilise = 0;
+		var poidsUtilise = 0;
 		if (solution[v].length > 0) {
 			textResult += "\n • 🏡 Dépôt "
 			for (let i = 0; i < solution[v].length; i++) {
 				let nextClient = solution[v][i];
 				textResult += " → C" + (nextClient+1);
 				distanceTotale += matDistanceClient[currentClient][nextClient+1];
-                poidsUtilise += demandesClients[nextClient];
+				poidsUtilise += demandesClients[nextClient];
 				currentClient = nextClient+1;
 			}
 
@@ -96,13 +90,13 @@ export function startSimulatedAnnealing(data) {
 			textResult += "\n • 🌍 Distance parcourue : " + distanceTotale.toFixed(2) + " kilomètre";
 			if (distanceTotale > 1)
 				textResult += "s"
-            textResult += "\n • 🎯 Poids utilisée : " + poidsUtilise.toFixed(2);
+			textResult += "\n • 🎯 Poids utilisée : " + poidsUtilise.toFixed(2);
 		}
 		else 
 			textResult += " ❌";
 	}
 
-    console.log(evaluateSolution(solution, false).totalDistance)
+	console.log(evaluateSolution(solution, false).totalDistance)
 
 	let graphData = generateGraphData(solution);
 	graphData.textResult = textResult;
@@ -112,85 +106,85 @@ export function startSimulatedAnnealing(data) {
 
 // Fonction pour évaluer la solution courante
 function evaluateSolution(solution, log = false) {
-    let totalDistance = 0;
-    let capacityExceeded = false;
+	let totalDistance = 0;
+	let capacityExceeded = false;
 
-    // On parcourt chaque véhicule et son parcours
-    for (let v = 0; v < nbVehicules; v++) {
-        let distanceTotale = 0;
-        let currentClient = 0; // Le véhicule commence au dépôt
-        let currentLoad = 0; // Charge actuelle du véhicule
+	// On parcourt chaque véhicule et son parcours
+	for (let v = 0; v < nbVehicules; v++) {
+		let distanceTotale = 0;
+		let currentClient = 0; // Le véhicule commence au dépôt
+		let currentLoad = 0; // Charge actuelle du véhicule
 
-        // Si le véhicule a des clients assignés, on calcule la distance
-        if (solution[v] != null && solution[v].length > 0) {
-            for (let i = 0; i < solution[v].length; i++) {
-                let nextClient = solution[v][i];
-                if (log)
-                    console.log(matDistanceClient[currentClient][nextClient+1])
-                distanceTotale += matDistanceClient[currentClient][nextClient+1];
-                currentLoad += demandesClients[nextClient];
+		// Si le véhicule a des clients assignés, on calcule la distance
+		if (solution[v] != null && solution[v].length > 0) {
+			for (let i = 0; i < solution[v].length; i++) {
+				let nextClient = solution[v][i];
+				if (log)
+					console.log(matDistanceClient[currentClient][nextClient+1])
+				distanceTotale += matDistanceClient[currentClient][nextClient+1];
+				currentLoad += demandesClients[nextClient];
 
-                if (currentLoad > capaciteVehicule) {
-                    capacityExceeded = true; // Si on dépasse la capacité, on marque cette contrainte
-                    break;
-                }
+				if (currentLoad > capaciteVehicule) {
+					capacityExceeded = true; // Si on dépasse la capacité, on marque cette contrainte
+					break;
+				}
 
-                currentClient = nextClient+1;
-            }
+				currentClient = nextClient+1;
+			}
 
-            distanceTotale += matDistanceClient[currentClient][0];
+			distanceTotale += matDistanceClient[currentClient][0];
 
-            if (log)
-                console.log("v" + v + " : " + distanceTotale);
-        }
+			if (log)
+				console.log("v" + v + " : " + distanceTotale);
+		}
 
-        totalDistance += distanceTotale;
-    }
+		totalDistance += distanceTotale;
+	}
 
-    return { totalDistance, capacityExceeded };
+	return { totalDistance, capacityExceeded };
 }
 
 
 // Initialisation avec une méthode gloutonne randomisée
 function initializeSolution() {
-    let solution = [];
-    let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
-    // Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
-    for (let v = 0; v < nbVehicules; v++) {
-        solution[v] = [];
-    }
+	let solution = [];
+	let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
+	// Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
+	for (let v = 0; v < nbVehicules; v++) {
+		solution[v] = [];
+	}
 
-    // Mélanger les clients pour introduire de la randomisation avant la distribution
-    clients = shuffleArray(clients);
+	// Mélanger les clients pour introduire de la randomisation avant la distribution
+	clients = shuffleArray(clients);
 
-    clients.forEach(client => {
-        let minLoadVehicle = -1;
-        let minLoad = Number.MAX_VALUE;
-        // Trouver le véhicule avec la charge la plus faible et qui respecte la capacité
-        for (let v = 0; v < nbVehicules; v++) {
-            let currentLoad = solution[v].reduce((sum, c) => sum + demandesClients[c], 0);
-            if (currentLoad + demandesClients[client] <= capaciteVehicule && currentLoad < minLoad) {
-                minLoadVehicle = v;
-                minLoad = currentLoad;
-            }
-        }
+	clients.forEach(client => {
+		let minLoadVehicle = -1;
+		let minLoad = Number.MAX_VALUE;
+		// Trouver le véhicule avec la charge la plus faible et qui respecte la capacité
+		for (let v = 0; v < nbVehicules; v++) {
+			let currentLoad = solution[v].reduce((sum, c) => sum + demandesClients[c], 0);
+			if (currentLoad + demandesClients[client] <= capaciteVehicule && currentLoad < minLoad) {
+				minLoadVehicle = v;
+				minLoad = currentLoad;
+			}
+		}
 
-        // Ajouter le client au véhicule avec la charge la plus faible
-        if (minLoadVehicle !== -1) {
-            solution[minLoadVehicle].push(client);
-        }
-    });
+		// Ajouter le client au véhicule avec la charge la plus faible
+		if (minLoadVehicle !== -1) {
+			solution[minLoadVehicle].push(client);
+		}
+	});
 
-    return solution;
+	return solution;
 }
 
 // Fonction de mélange aléatoire pour la randomisation
 function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+	return array;
 }
 
 
@@ -211,90 +205,90 @@ function countPoids(vehicule, client) {
 
 
 function perturbSolution(solution) {
-    for (let voisin = 0; voisin < nbClients; voisin++) {
-        let newSolution = clone(solution)
+	for (let voisin = 0; voisin < nbClients; voisin++) {
+		let newSolution = clone(solution)
 
-        let v1 = Math.floor(Math.random() * nbVehicules);
-        let v2 = Math.floor(Math.random() * nbVehicules);
-    
-        if (v1 !== v2 && newSolution[v1].length > 0) {
-            let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
-            let client = newSolution[v1][clientIndex];
+		let v1 = Math.floor(Math.random() * nbVehicules);
+		let v2 = Math.floor(Math.random() * nbVehicules);
+	
+		if (v1 !== v2 && newSolution[v1].length > 0) {
+			let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
+			let client = newSolution[v1][clientIndex];
 
-            if (countPoids(newSolution[v2], client)) {
-                let randClientIndex = Math.floor(Math.random() * newSolution[v2].length);
-                newSolution[v2].splice(randClientIndex, 0, client)
-                newSolution[v1].splice(clientIndex, 1);
-            }
+			if (countPoids(newSolution[v2], client)) {
+				let randClientIndex = Math.floor(Math.random() * newSolution[v2].length);
+				newSolution[v2].splice(randClientIndex, 0, client)
+				newSolution[v1].splice(clientIndex, 1);
+			}
 
-            let newObjective;
+			let newObjective;
 
-            for (let voisin = 0; voisin < nbClients; voisin++) {
-                let newSolution2 = clone(newSolution)
+			for (let voisin = 0; voisin < nbClients; voisin++) {
+				let newSolution2 = clone(newSolution)
 
-                let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
-                newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
+				let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
+				newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
 
-                let newTotalDistance = evaluateSolution(newSolution).totalDistance;
-                let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
+				let newTotalDistance = evaluateSolution(newSolution).totalDistance;
+				let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
 
-                if (newTotalDistance2 < newTotalDistance) {
-                    newSolution = newSolution2;
-                    newObjective = newTotalDistance2
-                }
-            }
+				if (newTotalDistance2 < newTotalDistance) {
+					newSolution = newSolution2;
+					newObjective = newTotalDistance2
+				}
+			}
 
-            let objective = evaluateSolution(solution).totalDistance;
-            newObjective = evaluateSolution(newSolution).totalDistance;
+			let objective = evaluateSolution(solution).totalDistance;
+			newObjective = evaluateSolution(newSolution).totalDistance;
 
-            if (newObjective < objective) {
-                solution = newSolution;
-            }
-        }
-    
-    }
+			if (newObjective < objective) {
+				solution = newSolution;
+			}
+		}
+	
+	}
 
-    return solution;
+	return solution;
 }
 
 
 
 function generateGraphData(solution) {
-    let nodes = [{ id: 0, label: "Dépôt", color: "red" }];
-    let edges = [];
+	let nodes = [{ id: 0, label: "Dépôt", color: "red" }];
+	let edges = [];
 
-    solution.forEach(route => {
-        let prevNode = 0; // Dépôt
+	solution.forEach(route => {
+		let prevNode = 0; // Dépôt
 
-        route.forEach(client => {
-            let nodeId = client+1; // Le client est déjà indexé correctement
+		route.forEach(client => {
+			let nodeId = client+1; // Le client est déjà indexé correctement
 
-            if (!nodes.find(n => n.id === nodeId)) {
-                nodes.push({ id: nodeId, label: `C${nodeId}` });
-            }
+			if (!nodes.find(n => n.id === nodeId)) {
+				nodes.push({ id: nodeId, label: `C${nodeId}` });
+			}
 
-            if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
-                edges.push({
-                    from: prevNode,
-                    to: nodeId,
-                    label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`
-                });
-            } else {
-                console.warn(`Index out of bounds: prevNode=${prevNode}, nodeId=${nodeId}`);
-            }
+			if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
+				edges.push({
+					from: prevNode,
+					to: nodeId,
+					label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`
+				});
+			} else {
+				console.warn(`Index out of bounds: prevNode=${prevNode}, nodeId=${nodeId}`);
+			}
 
-            prevNode = nodeId;
-        });
+			prevNode = nodeId;
+		});
 
-        // Retour au dépôt
-        if (prevNode < matDistanceClient.length && 0 < matDistanceClient[prevNode].length) {
-            edges.push({
-                from: prevNode,
-                to: 0,
-                label: `${matDistanceClient[prevNode][0].toFixed(1)} km`
-            });
-        }
-    });
+		// Retour au dépôt
+		if (prevNode < matDistanceClient.length && 0 < matDistanceClient[prevNode].length) {
+			edges.push({
+				from: prevNode,
+				to: 0,
+				label: `${matDistanceClient[prevNode][0].toFixed(1)} km`
+			});
+		}
+	});
 
-    return { nodes, edges };
+	return { nodes, edges };
 }
