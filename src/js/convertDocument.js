@@ -39,7 +39,7 @@ export default function convertDocument(file) {
 
                 const jsonData = {
                     quantiteMax: vehicleCapacity,
-                    nbVehicules: 25,
+                    nbVehicules: 15,
                     nbClients: numCustomers,
                     demandesClients: customers.map(c => c.demand),
                     matDistanceClient: dist

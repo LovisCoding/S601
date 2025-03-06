@@ -31,18 +31,19 @@ export function startSimulatedAnnealing(data) {
 	}
 
 	let solution = initializeSolution();
-	let T = data.tempInit || 100000;
-	let alpha = data.tempFactor || 0.99999;
-	let TMin = data.tempMin || 0.0000001;
+	let T = data.tempInit || 10000;
+	let alpha = data.tempFactor || 0.999;
+	let TMin = data.tempMin || 0.001;
 	let maxIterations = data.iterations || 10000;
 	let minImprovement = 0.001;
+
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
 	
 	for (let iter = 0; iter < maxIterations; iter++) {
 		if (T < TMin) break;
 	
-		let newSolution = perturbSolution(solution);
+		let newSolution = perturbSolution(solution, T);
 
 		let newObjective = evaluateSolution(newSolution).totalDistance;
 	
@@ -147,33 +148,26 @@ function evaluateSolution(solution, log = false) {
 
 // Initialisation avec une méthode gloutonne randomisée
 function initializeSolution() {
-	let solution = [];
-	let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
-	// Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
-	for (let v = 0; v < nbVehicules; v++) {
-		solution[v] = [];
-	}
+    let solution = [];
+    let clients = Array.from({ length: nbClients }, (_, index) => index); // Liste des clients (0 à nbClients-1)
+
+    // Distribution des clients parmi les véhicules de manière gloutonne mais randomisée
+    for (let v = 0; v < nbVehicules; v++) {
+        solution[v] = [];
+    }
 
 	// Mélanger les clients pour introduire de la randomisation avant la distribution
 	clients = shuffleArray(clients);
 
-	clients.forEach(client => {
-		let minLoadVehicle = -1;
-		let minLoad = Number.MAX_VALUE;
-		// Trouver le véhicule avec la charge la plus faible et qui respecte la capacité
-		for (let v = 0; v < nbVehicules; v++) {
-			let currentLoad = solution[v].reduce((sum, c) => sum + demandesClients[c], 0);
-			if (currentLoad + demandesClients[client] <= capaciteVehicule && currentLoad < minLoad) {
-				minLoadVehicle = v;
-				minLoad = currentLoad;
-			}
-		}
-
-		// Ajouter le client au véhicule avec la charge la plus faible
-		if (minLoadVehicle !== -1) {
-			solution[minLoadVehicle].push(client);
-		}
-	});
+    clients.forEach(client => {
+        // Attribuer les clients aux premiers véhicules non remplis
+        for (let v = 0; v < nbVehicules; v++) {
+            if (countPoids(solution[v], client)) {
+                solution[v].push(client);
+                break;
+            }
+        }
+    });
 
 	return solution;
 }
@@ -204,52 +198,59 @@ function countPoids(vehicule, client) {
 }
 
 
-function perturbSolution(solution) {
-	for (let voisin = 0; voisin < nbClients; voisin++) {
-		let newSolution = clone(solution)
+function perturbSolution(solution, temperature) {
+    let bestSolution = clone(solution);
+    let bestObjective = evaluateSolution(bestSolution).totalDistance;
 
-		let v1 = Math.floor(Math.random() * nbVehicules);
-		let v2 = Math.floor(Math.random() * nbVehicules);
-	
-		if (v1 !== v2 && newSolution[v1].length > 0) {
-			let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
-			let client = newSolution[v1][clientIndex];
+    for (let i = 0; i < nbClients; i++) {
+        let newSolution = clone(bestSolution);
 
-			if (countPoids(newSolution[v2], client)) {
-				let randClientIndex = Math.floor(Math.random() * newSolution[v2].length);
-				newSolution[v2].splice(randClientIndex, 0, client)
-				newSolution[v1].splice(clientIndex, 1);
-			}
+        // Sélectionner deux véhicules aléatoires
+        let v1 = Math.floor(Math.random() * nbVehicules);
+        let v2 = Math.floor(Math.random() * nbVehicules);
 
-			let newObjective;
+        if (v1 !== v2 && newSolution[v1].length > 0) {
+            let clientIndex = Math.floor(Math.random() * newSolution[v1].length);
 
-			for (let voisin = 0; voisin < nbClients; voisin++) {
-				let newSolution2 = clone(newSolution)
+            let client = newSolution[v1][clientIndex];
 
-				let vehiculeIndex = Math.floor(Math.random() * newSolution.length);
-				newSolution2[vehiculeIndex] = shuffleArray(newSolution2[vehiculeIndex])
+            // Vérifier si le véhicule v2 peut accueillir ce client
+            if (countPoids(newSolution[v2], client)) {
+                let randClientIndex = Math.floor(Math.random() * (newSolution[v2].length + 1));
+                newSolution[v2].splice(randClientIndex, 0, client);
+                newSolution[v1].splice(clientIndex, 1);
+            }
 
-				let newTotalDistance = evaluateSolution(newSolution).totalDistance;
-				let newTotalDistance2 = evaluateSolution(newSolution2).totalDistance;
+            let newObjective = evaluateSolution(newSolution).totalDistance;
 
-				if (newTotalDistance2 < newTotalDistance) {
-					newSolution = newSolution2;
-					newObjective = newTotalDistance2
-				}
-			}
 
-			let objective = evaluateSolution(solution).totalDistance;
-			newObjective = evaluateSolution(newSolution).totalDistance;
+            let newSolutionShuffle = clone(newSolution)
+            // Ajouter une légère perturbation (shuffle d'un véhicule)
+            let vehiculeIndex = Math.floor(Math.random() * nbVehicules);
+            newSolutionShuffle[vehiculeIndex] = shuffleArray(newSolutionShuffle[vehiculeIndex]);
 
-			if (newObjective < objective) {
-				solution = newSolution;
-			}
-		}
-	
-	}
+            let newShuffleObjective = evaluateSolution(newSolutionShuffle).totalDistance;
 
-	return solution;
+            if (newShuffleObjective < newObjective) {
+                newSolution = newSolutionShuffle;
+                newObjective = newShuffleObjective;
+            }
+                
+            // Évaluation
+            let delta = newObjective - bestObjective;
+
+            // 🌡️ **Règle d'acceptation du recuit simulé**
+            if (delta < 0 || Math.random() < Math.exp(-delta / temperature)) {
+                bestSolution = newSolution;
+                bestObjective = newObjective;
+            }
+        }
+    }
+    
+
+    return bestSolution;
 }
+
 
 
 
