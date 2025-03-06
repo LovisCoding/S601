@@ -46,8 +46,11 @@ export function startSimulatedAnnealing(data) {
 	let totalDemande = 0
 	let graphData = {};
 
+    let previousBestSolutions = [];
+
 	graphData.edges = [];
 	graphData.nodes = [];
+    graphData.previousBestSolutions = previousBestSolutions;
 	graphData.maxDistance = 0;
 
 	// Vérification des contraintes
@@ -102,6 +105,13 @@ export function startSimulatedAnnealing(data) {
 	
 		T *= alpha; // Réduction de la température
 
+        if (iter%(maxIterations/100) == 0) {
+            previousBestSolutions.push({
+                iteration: iter%(maxIterations/100),
+                text: getVehicleDetails(solution)
+            });
+        }
+
 	}
 
 	// Génération des données pour le graphique
@@ -131,9 +141,20 @@ export function startSimulatedAnnealing(data) {
 	}
 	textResult += "\n • 🛑 Raison de l'arrêt : " + raisonFin;
 	textResult += "\n • 🔄 Itérations utilisées : " + iterUtilisee;
+	textResult += "\n • 🌡️ Température atteinte : " + T + "/" + TMin;
 	textResult += "\n\n 🗺️ Trajets : ";
 
-	for (let v = 0; v < nbVehicules; v++) {
+    textResult += getVehicleDetails(solution)
+
+	graphData = generateGraphData(solution);
+	graphData.textResult = textResult;
+    graphData.previousBestSolutions = previousBestSolutions;
+	return { ...graphData};
+}
+
+function getVehicleDetails(solution) {
+    let textResult = "";
+    for (let v = 0; v < nbVehicules; v++) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		let distanceTotale = 0;
 		let currentClient = 0;
@@ -158,10 +179,7 @@ export function startSimulatedAnnealing(data) {
 		else 
 			textResult += " ❌";
 	}
-
-	graphData = generateGraphData(solution);
-	graphData.textResult = textResult;
-	return { ...graphData};
+    return textResult;
 }
 
 
