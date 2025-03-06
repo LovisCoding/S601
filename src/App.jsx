@@ -104,7 +104,7 @@ export default function App() {
 					<motion.div key="page2" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ position: 'absolute', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 						<Stack spacing={3} mt={4} alignItems={"center"}>
 							<Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-								Importer des données
+								Utiliser l'algorithme
 							</Button>
 							<Box height={'80vh'}>
 							{graphData && <GraphComponent graphData={graphData} />}
