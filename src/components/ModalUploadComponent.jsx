@@ -11,7 +11,8 @@ import {
 	Tooltip,
 	Typography,
 	TextField,
-	useMediaQuery
+	useMediaQuery,
+    CircularProgress
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import { HiOutlineUpload } from "react-icons/hi";
@@ -30,6 +31,7 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 	const [error, setError] = useState(null);
 	const [data, setData] = useState(null);
 	const [uploadSuccess, setUploadSuccess] = useState(null);
+    const [loading, setLoading] = useState(false);
 	const [values, setValues] = useState({
 		vehicles: 8,
 		tempMin: 0.0001,
@@ -53,14 +55,27 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 		setOpen(false);
 	};
 
-	const startAlgo = () => {
-		if (uploadSuccess) {
-			onLaunch(data);
-			setOpen(false);
-			return;
-		}
-		setUploadSuccess(false);
-	};
+    const startAlgo = async () => {
+        if (uploadSuccess) {
+            setLoading(true);
+            try {
+                await new Promise((resolve) => {
+                    setTimeout(async () => {
+                        await onLaunch(data);
+                        setLoading(false);
+                        setOpen(false);
+                        resolve();
+                    }, 100);
+                });
+            } catch (error) {
+                setLoading(false);
+                console.error("Error running algorithm:", error);
+            }
+            return;
+        }
+        setUploadSuccess(false);
+    };
+
 
 	const uploadDocument = async (event) => {
 		if (event.target.files && event.target.files[0]) {
@@ -234,11 +249,30 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 							/>
 						</Grid2>
 					</Grid2>
+                    {loading && (
+                    <Box
+                        sx={{
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                            zIndex: 1300,
+                        }}
+                    >
+                        <CircularProgress size={60} color="primary"  disableShrink/>
+                    </Box>
+                )}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={startAlgo}>Lancer l'Algorithme</Button>
 				</DialogActions>
 			</Dialog>
+            
 			<Snackbar
 				open={!!error}
 				autoHideDuration={5000}
