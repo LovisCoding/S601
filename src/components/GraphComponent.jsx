@@ -5,6 +5,9 @@ import { Typography, Box } from "@mui/material";
 const GraphComponent = ({ graphData }) => {
     const graphRef = useRef(null);
 
+
+    console.log(graphData.nodes);
+
     useEffect(() => {
         if (!graphData) return;
 
@@ -13,11 +16,22 @@ const GraphComponent = ({ graphData }) => {
         const nodes = new DataSet(graphData.nodes.map(node => ({
             id: node.id,
             label: node.label,
-            font: { color: "#000", size: 18, vadjust: 0 },
-            color: { border: "#000", highlight: { border: "#000" } },
+            font: { 
+                color: "#000", 
+                size: node.fontSize ,// 🔥 Taille du texte augmentée
+                vadjust: 0 // 🔥 Légère correction pour un meilleur centrage
+            },
+            color: { 
+                border: node.color, 
+                background: '#FFF', // 🔥 Couleur différente pour le dépôt (facultatif)
+                highlight: { border: "#000" } 
+            },
             shape: "circle",
-            size: 25
+            size: node.nodeSize, // 🔥 Taille du dépôt plus grande (100 plutôt que 200 pour éviter trop de vide)
+            heightConstraint: { minimum: node.nodeSize, valign: "middle" }, // 🔥 Ajustement de la hauteur pour forcer le centrage
+            widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, // 🔥 Ajustement de la largeur
         })));
+        
 
         const edges = new DataSet(filteredEdges.map(edge => ({
             from: edge.from,
@@ -25,13 +39,14 @@ const GraphComponent = ({ graphData }) => {
             label: edge.label.toString(),
             arrows: 'to',
             font: { align: "middle", color: "#000", size: 14 },
-            color: "#000"
+            color: edge.color // Couleur aléatoire pour chaque arête
         })));
 
         const networkData = { nodes, edges };
         const options = {
             edges: { color: "#000000" },
-            nodes: { shape: "circle", size: 20 },
+            nodes: { shape: "circle" },
+            autoResize: false,
         };
 
         new Network(graphRef.current, networkData, options);
