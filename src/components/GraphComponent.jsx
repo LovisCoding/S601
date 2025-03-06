@@ -88,10 +88,10 @@ const GraphComponent = ({ graphData }) => {
                     {selectedNode ? (
                         <>
                             <DialogContentText>
-                                <strong>Véhicule :</strong> {selectedNode.vehicle}
+                                <strong>🚚 Véhicule :</strong> {selectedNode.vehicle}
                             </DialogContentText>
                             <DialogContentText>
-                                <strong>Demandes :</strong> {selectedNode.ask}
+                                <strong>📦 Demandes :</strong> {selectedNode.ask}
                             </DialogContentText>
                         </>
                     ) : (
