@@ -108,7 +108,7 @@ export function startSimulatedAnnealing(data) {
         if (iter%(maxIterations/100) == 0) {
             previousBestSolutions.push({
                 iteration: iter,
-                text: getVehicleDetails(solution, false)
+                text: getVehicleDetails(solution, true)
             });
         }
 
@@ -152,13 +152,11 @@ export function startSimulatedAnnealing(data) {
 	return { ...graphData};
 }
 
-function getVehicleDetails(solution, returnLine = true) {
+function getVehicleDetails(solution, solutionOptimale = false) {
+    let totalDistance = 0;
     let textResult = "";
     for (let v = 0; v < nbVehicules; v++) {
-        if (returnLine || (!returnLine && v != 0)) 
-            textResult += "\n\n";
-
-		textResult += " 🚚 Véhicule " + (v+1) + " : ";
+		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		let distanceTotale = 0;
 		let currentClient = 0;
 		let poidsUtilise = 0;
@@ -181,7 +179,12 @@ function getVehicleDetails(solution, returnLine = true) {
 		}
 		else 
 			textResult += " ❌";
+
+        totalDistance += distanceTotale
 	}
+
+    if (solutionOptimale) 
+        textResult = "Solution trouvée : " + totalDistance.toFixed(2) + " kilomètres " + textResult;
     return textResult;
 }
 
