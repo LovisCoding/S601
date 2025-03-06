@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { DataSet, Network } from "vis-network/standalone";
-import { Typography, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
+import { Typography, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
 const GraphComponent = ({ graphData }) => {
     const graphRef = useRef(null);
     const [open, setOpen] = useState(false);
+    const [openDetail, setOpenDetail] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);
+    const [selectedDetail, setSelectedDetail] = useState(null);
+    const [selectedIteration, setSelectedIteration] = useState("");
 
     useEffect(() => {
         if (!graphData) return;
 
+        console.log(graphData.previousBestSolutions)
 		const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
 
         const nodes = new DataSet(graphData.nodes.map(node => ({
@@ -69,17 +73,61 @@ const GraphComponent = ({ graphData }) => {
 
     const handleClose = () => {
         setOpen(false);
+        setOpenDetail(false);
+    };
+
+    const handleSelectChange = (event) => {
+        const iteration = event.target.value;
+        console.log("iter : " + iteration)
+        setSelectedIteration(iteration);
+        const selectedSolution = graphData.previousBestSolutions.find(solution => solution.iteration === iteration);
+        console.log("selectedSolution : " + selectedSolution)
+        if (selectedSolution) {
+            setSelectedDetail(selectedSolution);
+            setOpenDetail(true);
+        }
     };
 
     return (
         <Box display="flex" width="100%" height="80vh" position="relative">
             <Box display="flex" flexDirection="column" width="450px" height="100%" overflow="auto" padding={2}>
+                <FormControl fullWidth>
+                    <InputLabel>Solutions Précédentes</InputLabel>
+                    <Select value={selectedIteration} onChange={handleSelectChange} label="Solutions Précédentes">
+                        {graphData.previousBestSolutions.map(solution => (
+                            <MenuItem key={solution.iteration} value={solution.iteration}>
+                                Iteration {solution.iteration}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
                 <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
                 <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
                     {graphData.textResult}
                 </Typography>
             </Box>
             <Box ref={graphRef} flex={1} height="100%" order={2} />
+
+            {/* Modal de détail pour afficher les informations du nœud sélectionné */}
+            <Dialog open={openDetail} onClose={handleClose}>
+                <DialogTitle>Détail de la solution</DialogTitle>
+                <DialogContent>
+                    {selectedDetail ? (
+                        <>
+                            <Typography style={{whiteSpace:"pre-wrap"}}> 
+                                {selectedDetail.text}
+                            </Typography>
+                        </>
+                    ) : (
+                        <DialogContentText>Aucun détail disponible.</DialogContentText>
+                    )} 
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Fermer
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Modal de détail pour afficher les informations du nœud sélectionné */}
             <Dialog open={open} onClose={handleClose}>
