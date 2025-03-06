@@ -6,6 +6,9 @@ export default function convertDocument(file) {
             try {
                 const lines = event.target.result.split('\n').map(line => line.trim()).filter(line => line);
                 let [numCustomers] = lines[0].split(" ").map(Number);
+                let objectif = 0;
+                if (lines[0].split(" ").length >= 2)
+                    objectif = lines[0].split(" ").map(Number)[1]
                 let vehicleCapacity = parseInt(lines[1]);
                 let customers = [];
 
@@ -38,6 +41,7 @@ export default function convertDocument(file) {
                 }
 
                 const jsonData = {
+                    objectif: objectif,
                     quantiteMax: vehicleCapacity,
                     nbVehicules: 15,
                     nbClients: numCustomers,
@@ -47,6 +51,7 @@ export default function convertDocument(file) {
 
                 resolve(jsonData);
             } catch (error) {
+                console.log("error file")
                 reject(error);
             }
         };

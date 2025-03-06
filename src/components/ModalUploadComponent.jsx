@@ -33,11 +33,11 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 	const [uploadSuccess, setUploadSuccess] = useState(null);
     const [loading, setLoading] = useState(false);
 	const [values, setValues] = useState({
-		vehicles: 8,
-		tempMin: 0.0001,
+		vehicles: 12,
+		tempMin: 0.001,
 		tempInit: 10000,
 		tempFactor: 0.999,
-		iterations: 200000
+		iterations: 10000
 	});
 
 	const handleChange = (key) => (event, newValue) => {
@@ -59,7 +59,9 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
     const startAlgo = async () => {
         if (uploadSuccess) {
             setLoading(true);
+			console.log(data)
             const algoData = {
+				objectif: data.objectif,
 				nbVehicules: values.vehicles,
 				nbClients: data.demandesClients.length,
 				quantiteMax: data.quantiteMax,

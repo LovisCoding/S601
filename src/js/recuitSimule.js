@@ -1,5 +1,7 @@
 import { clone } from "chart.js/helpers";
+import { time } from "framer-motion";
 
+let objectif = 31.3; // Object minimal trouvée (pour statistiques)
 let nbVehicules = 4;   // Nombre de véhicules
 let nbClients = 10;     // Nombre de clients
 let capaciteVehicule = 100; // Capacité maximale de chaque véhicule (en termes de poids ou de colis)
@@ -23,6 +25,7 @@ let matDistanceClient = [
 // Recuit simulé
 export function startSimulatedAnnealing(data) {
 	if (data != null) {
+        objectif = data.objectif || 0;
 		nbVehicules = data.nbVehicules;
 		nbClients = data.nbClients;
 		capaciteVehicule = data.quantiteMax;
@@ -30,6 +33,7 @@ export function startSimulatedAnnealing(data) {
 		matDistanceClient = data.matDistanceClient;
 	}
 
+    let timeStart = Date.now();
 	let solution = initializeSolution();
 	let T = data.tempInit || 10000;
 	let alpha = data.tempFactor || 0.999;
@@ -58,8 +62,14 @@ export function startSimulatedAnnealing(data) {
 
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
+    let iterUtilisee = maxIterations;
+    let raisonFin = " maximum d'itérations utilisées";
 	for (let iter = 0; iter < maxIterations; iter++) {
-		if (T < TMin) break;
+		if (T < TMin) {
+            iterUtilisee = iter;
+            raisonFin = " température minimale atteinte"
+            break;
+        }
 	
 		let newSolution = perturbSolution(solution, T);
 
@@ -75,25 +85,49 @@ export function startSimulatedAnnealing(data) {
 		if (Math.abs(bestObjective - newObjective) < minImprovement) {
 			noImprovementCounter++;
 			if (noImprovementCounter > maxIterations/100) {
-				console.log("stagne")
+                iterUtilisee = iter;
+                raisonFin = " pas de changements sur les " + maxIterations/100 + " dernières itérations";
 				break;
-			} // Arrêter après 1000 itérations sans amélioration significative
+			} 
 		}
 	
 		T *= alpha; // Réduction de la température
 
-		if (iter % 10000 == 0) console.log("iter : " + iter)
-	}
+	}	
 
-	console.log("T : " + T)
-	
+    let textResult = "Solution trouvée : " + bestObjective.toFixed(2) + " kilomètres";
+    if (objectif != 0) {
+        let diffObjectif = (bestObjective - objectif);
+        textResult = "Solution trouvée : " + bestObjective.toFixed(2) + "/" + objectif.toFixed(2) + " kilomètres";
+        if (diffObjectif >= 0.01) {
+            textResult += " (+" +  ((diffObjectif/bestObjective)*100).toFixed(2) + "%)";
+        }
+    }
 
-	var textResult = "Solution optimale avec objectif " + bestObjective.toFixed(2) + " kilomètres";
+    textResult += "\n\n Statistiques : "
+
+    let execTime = (Date.now() - timeStart)/1000
+    textResult += "\n • Temps utilisé : " + execTime.toFixed(3) + " seconde";
+    if (execTime >= 2)
+        textResult += "s";
+
+    if (objectif != 0) {
+        let diffObjectif = (bestObjective - objectif);
+        if (diffObjectif >= 0.01) {
+            textResult += "\n • Différences avec la solution optimale : " + diffObjectif.toFixed(2) + " kilomètre";
+            if (diffObjectif >= 2)
+                textResult += "s"
+        }
+    }
+    textResult += "\n • Raison de l'arrêt : " + raisonFin;
+    textResult += "\n • Itérations utilisées : " + iterUtilisee;
+
+
 	for (let v = 0; v < nbVehicules; v++) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
-		var distanceTotale = 0;
-		var currentClient = 0;
-		var poidsUtilise = 0;
+		let distanceTotale = 0;
+		let currentClient = 0;
+		let poidsUtilise = 0;
 		if (solution[v].length > 0) {
 			textResult += "\n • 🏡 Dépôt "
 			for (let i = 0; i < solution[v].length; i++) {
@@ -274,17 +308,19 @@ function generateGraphData(solution) {
 		let prevNode = 0; // Dépôt
 
 		route.forEach(client => {
-			let nodeId = client+1; // Le client est déjà indexé correctement
+            let color = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+			let nodeId = client+1;
 
 			if (!nodes.find(n => n.id === nodeId)) {
-				nodes.push({ id: nodeId, label: `C${nodeId}` });
+				nodes.push({ id: nodeId, label: `C${nodeId}`, color: color });
 			}
 
 			if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
 				edges.push({
 					from: prevNode,
 					to: nodeId,
-					label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`
+					label: `${matDistanceClient[prevNode][nodeId].toFixed(1)} km`,
+                    color: color
 				});
 			} else {
 				console.warn(`Index out of bounds: prevNode=${prevNode}, nodeId=${nodeId}`);
