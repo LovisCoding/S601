@@ -62,7 +62,7 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
             const algoData = {
 				nbVehicules: values.vehicles,
 				nbClients: data.demandesClients.length,
-				quantiteMax: values.vehicles,
+				quantiteMax: data.quantiteMax,
 				demandesClients: data.demandesClients,
 				matDistanceClient: data.matDistanceClient,
 				tempMin: values.tempMin,

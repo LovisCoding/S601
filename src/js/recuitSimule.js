@@ -39,7 +39,6 @@ export function startSimulatedAnnealing(data) {
 
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
-	
 	for (let iter = 0; iter < maxIterations; iter++) {
 		if (T < TMin) break;
 	
