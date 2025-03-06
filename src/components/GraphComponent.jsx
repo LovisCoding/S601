@@ -89,11 +89,11 @@ const GraphComponent = ({ graphData }) => {
     };
 
     return (
-        <Box display="flex" width="100%" height="80vh" position="relative">
-            <Box display="flex" flexDirection="column" width="450px" height="100%" overflow="auto" padding={2}>
-                <FormControl fullWidth>
-                    <InputLabel>Solutions Précédentes</InputLabel>
-                    <Select value={selectedIteration} onChange={handleSelectChange} label="Solutions Précédentes">
+        <Box display="flex" width="100%" height="80vh" position="relative" >
+            <Box width="450px" display="flex" flexDirection="column">
+                <FormControl size="small" sx={{mb:4, mx:1}}>
+                    <InputLabel>Ouvrir une solution précédente</InputLabel>
+                    <Select value={selectedIteration} onChange={handleSelectChange} label="Ouvrir une solution précédente">
                         {graphData.previousBestSolutions.map(solution => (
                             <MenuItem key={solution.iteration} value={solution.iteration}>
                                 Iteration {solution.iteration}
@@ -101,11 +101,15 @@ const GraphComponent = ({ graphData }) => {
                         ))}
                     </Select>
                 </FormControl>
-                <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
-                <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
-                    {graphData.textResult}
-                </Typography>
+
+                <Box display="flex" flexDirection="column" height="90%" overflow="auto" padding={2}>
+                    <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
+                    <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
+                        {graphData.textResult}
+                    </Typography>
+                </Box>
             </Box>
+
             <Box ref={graphRef} flex={1} height="100%" order={2} />
 
             {/* Modal de détail pour afficher les informations du nœud sélectionné */}

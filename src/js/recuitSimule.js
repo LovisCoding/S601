@@ -108,7 +108,7 @@ export function startSimulatedAnnealing(data) {
         if (iter%(maxIterations/100) == 0) {
             previousBestSolutions.push({
                 iteration: iter,
-                text: getVehicleDetails(solution)
+                text: getVehicleDetails(solution, false)
             });
         }
 
