@@ -37,6 +37,25 @@ export function startSimulatedAnnealing(data) {
 	let maxIterations = data.iterations || 10000;
 	let minImprovement = 0.001;
 
+    let graphData = {};
+    graphData.edges = [];
+    graphData.nodes = [];
+    let totalDemande = 0
+    for (let iDemande = 0; iDemande < demandesClients.length; iDemande++) {
+        totalDemande += demandesClients[iDemande];
+
+        if (demandesClients[iDemande] > capaciteVehicule) {
+            graphData.textResult = "La demande d'un client dépasse la quantité maximum des véhicules";
+            return {...graphData};
+        }
+    }
+    
+    if (totalDemande > nbVehicules * capaciteVehicule){
+        graphData.textResult = "Les demandes des clients sont trop grandes pour le nombre de véhicules";
+        return {...graphData};
+    }
+
+
 	let bestObjective = Infinity;
 	let noImprovementCounter = 0;
 	for (let iter = 0; iter < maxIterations; iter++) {
@@ -96,16 +115,14 @@ export function startSimulatedAnnealing(data) {
 			textResult += " ❌";
 	}
 
-	console.log(evaluateSolution(solution, false).totalDistance)
-
-	let graphData = generateGraphData(solution);
+	graphData = generateGraphData(solution);
 	graphData.textResult = textResult;
 	return { ...graphData};
 }
 
 
 // Fonction pour évaluer la solution courante
-function evaluateSolution(solution, log = false) {
+function evaluateSolution(solution) {
 	let totalDistance = 0;
 	let capacityExceeded = false;
 
@@ -119,9 +136,8 @@ function evaluateSolution(solution, log = false) {
 		if (solution[v] != null && solution[v].length > 0) {
 			for (let i = 0; i < solution[v].length; i++) {
 				let nextClient = solution[v][i];
-				if (log)
-					console.log(matDistanceClient[currentClient][nextClient+1])
-				distanceTotale += matDistanceClient[currentClient][nextClient+1];
+
+                distanceTotale += matDistanceClient[currentClient][nextClient+1];
 				currentLoad += demandesClients[nextClient];
 
 				if (currentLoad > capaciteVehicule) {
@@ -133,9 +149,6 @@ function evaluateSolution(solution, log = false) {
 			}
 
 			distanceTotale += matDistanceClient[currentClient][0];
-
-			if (log)
-				console.log("v" + v + " : " + distanceTotale);
 		}
 
 		totalDistance += distanceTotale;
