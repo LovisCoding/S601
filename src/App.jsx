@@ -11,11 +11,6 @@ import Icon from './assets/img/RouteSolver.png';
 import { Stack } from '@mui/material';
 import * as dataCantine  from './assets/dataCantine.json';
 
-
- 
-
-
-
 export default function App() {
 	const [open, setOpen] = React.useState(false);
 	const [page, setPage] = React.useState(0);
@@ -23,16 +18,14 @@ export default function App() {
 	const totalPages = 2;
 
 	React.useEffect(() => {
-		
-
 		window.addEventListener('wheel', handleScroll, { passive: false });
 		
 		handleRunAlgorithm(dataCantine);
 		return () => {
 			window.removeEventListener('wheel', handleScroll);
 		};
-		
 	}, []);
+
 	const handleScroll = (event) => {
 		event.preventDefault();
 		setPage((prevPage) => {
@@ -42,10 +35,10 @@ export default function App() {
 		});
 	};
 
-  const handleRunAlgorithm = (data) => {
-    const result = startSimulatedAnnealing(data);
-    setGraphData(result);
-  };
+	const handleRunAlgorithm = (data) => {
+		const result = startSimulatedAnnealing(data);
+		setGraphData(result);
+	};
 
 	const nextPage = () => {
 		setPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
@@ -62,14 +55,11 @@ export default function App() {
 		exit: { opacity: 0, y: -50, transition: { duration: 0.6, ease: "easeInOut" } }
 	};
 
-
 	return (
 		<Box sx={{ height: '100vh', overflow: 'hidden', position: 'relative', backgroundColor: '#f5f5f5' }}>
 			<Box sx={{ position: 'fixed', top: 0, left: 0, padding: 2, zIndex: 10, cursor: 'pointer' }}>
 				<img src={Icon} alt="Icon" style={{ width: 130, height: 75 }} onClick={firstPage} />
 			</Box>
-
-
 			<AnimatePresence mode="wait">
 				{page === 0 && (
 					<motion.div key="page1" variants={pageVariants} initial="initial" animate="animate" exit="exit" style={{ position: 'absolute', width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -77,7 +67,6 @@ export default function App() {
 							ROUTESOLVER
 						</Typography>
 						<img src={GraphImage} alt="Graph Representation" style={{ width: 1200, height: 600, filter: 'blur(5px)' }} />
-
 						<Box sx={{ position: 'absolute', bottom: 20, display: 'flex', justifyContent: 'center', width: '100%', cursor: 'pointer' }} onClick={nextPage}>
 							<motion.svg
 								xmlns="http://www.w3.org/2000/svg"

@@ -12,7 +12,7 @@ import {
 	Typography,
 	TextField,
 	useMediaQuery,
-    CircularProgress
+	CircularProgress
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import { HiOutlineUpload } from "react-icons/hi";
@@ -31,7 +31,7 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 	const [error, setError] = useState(null);
 	const [data, setData] = useState(null);
 	const [uploadSuccess, setUploadSuccess] = useState(null);
-    const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [values, setValues] = useState({
 		vehicles: 12,
 		tempMin: 0.001,
@@ -55,12 +55,11 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 		setOpen(false);
 	};
 
-
-    const startAlgo = async () => {
-        if (uploadSuccess) {
-            setLoading(true);
+	const startAlgo = async () => {
+		if (uploadSuccess) {
+			setLoading(true);
 			console.log(data)
-            const algoData = {
+			const algoData = {
 				objectif: data.objectif,
 				nbVehicules: values.vehicles,
 				nbClients: data.demandesClients.length,
@@ -72,23 +71,23 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 				tempFactor: values.tempFactor,
 				iterations: values.iterations
 			};
-            try {
-                await new Promise((resolve) => {
-                    setTimeout(async () => {
-                        await onLaunch(algoData);
-                        setLoading(false);
-                        setOpen(false);
-                        resolve();
-                    }, 100);
-                });
-            } catch (error) {
-                setLoading(false);
-                console.error("Error running algorithm:", error);
-            }
-            return;
-        }
-        setUploadSuccess(false);
-    };
+			try {
+				await new Promise((resolve) => {
+					setTimeout(async () => {
+						await onLaunch(algoData);
+						setLoading(false);
+						setOpen(false);
+						resolve();
+					}, 100);
+				});
+			} catch (error) {
+				setLoading(false);
+				console.error("Error running algorithm:", error);
+			}
+			return;
+		}
+		setUploadSuccess(false);
+	};
 
 	const uploadDocument = async (event) => {
 		if (event.target.files && event.target.files[0]) {
@@ -262,30 +261,30 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 							/>
 						</Grid2>
 					</Grid2>
-                    {loading && (
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "rgba(0, 0, 0, 0.5)",
-                            zIndex: 1300,
-                        }}
-                    >
-                        <CircularProgress size={60} color="primary"  disableShrink/>
-                    </Box>
-                )}
+					{loading && (
+					<Box
+						sx={{
+							position: "fixed",
+							top: 0,
+							left: 0,
+							width: "100%",
+							height: "100%",
+							display: "flex",
+							justifyContent: "center",
+							alignItems: "center",
+							backgroundColor: "rgba(0, 0, 0, 0.5)",
+							zIndex: 1300,
+						}}
+					>
+						<CircularProgress size={60} color="primary"  disableShrink/>
+					</Box>
+				)}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={startAlgo}>Lancer l'Algorithme</Button>
 				</DialogActions>
 			</Dialog>
-            
+			
 			<Snackbar
 				open={!!error}
 				autoHideDuration={5000}
