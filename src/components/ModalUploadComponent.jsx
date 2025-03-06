@@ -114,10 +114,10 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 				onClose={handleClose}
 				fullScreen={fullScreen}
 			>
-				<DialogTitle>Upload un document</DialogTitle>
+				<DialogTitle>Utilisation de l'algorithme Recuit Simulé</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Vous pouvez uploader un document pour afficher le graphe de celui-ci
+						Veuillez sélectionner un fichier .txt contenant les données du problème de VRP. 
 					</DialogContentText>
 					<Stack
 						direction="row"
@@ -134,7 +134,7 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 							startIcon={<HiOutlineUpload />}
 							aria-label="Upload File"
 						>
-							Upload File
+							Ajouter un fichier
 							<input
 								type="file"
 								hidden
