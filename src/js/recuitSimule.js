@@ -267,7 +267,7 @@ function perturbSolution(solution, temperature) {
 
 
 function generateGraphData(solution) {
-	let nodes = [{ id: 0, label: "Dépôt", color: "red" }];
+	let nodes = [{ id: 0, label: "🏭", color: "red" }];
 	let edges = [];
 
 	solution.forEach(route => {
@@ -277,7 +277,7 @@ function generateGraphData(solution) {
 			let nodeId = client+1; // Le client est déjà indexé correctement
 
 			if (!nodes.find(n => n.id === nodeId)) {
-				nodes.push({ id: nodeId, label: `C${nodeId}` });
+				nodes.push({ id: nodeId, label: `👨🏻‍💼${nodeId}` });
 			}
 
 			if (prevNode < matDistanceClient.length && nodeId < matDistanceClient[prevNode].length) {
