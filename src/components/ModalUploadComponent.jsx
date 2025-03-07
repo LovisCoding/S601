@@ -114,7 +114,7 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 				<DialogTitle>Utilisation de l'algorithme Recuit Simulé</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Veuillez sélectionner un fichier .txt contenant les données du problème de VRP. 
+						Veuillez sélectionner un fichier .txt contenant les données du VRP. 
 					</DialogContentText>
 					<Stack
 						direction="row"
