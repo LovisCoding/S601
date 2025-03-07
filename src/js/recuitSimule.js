@@ -58,24 +58,24 @@ export function startSimulatedAnnealing(data) {
 		totalDemande += demandesClients[iDemande];
 
 		if (demandesClients[iDemande] > capaciteVehicule) {
-			graphData.textResult = "La demande d'un client dépasse la quantité maximum des véhicules";
+			graphData.textResult = "La demande d'un client dépasse la quantité maximum des véhicules.";
 			return {...graphData};
 		}
 	}
 	
 	if (totalDemande > nbVehicules * capaciteVehicule){
-		graphData.textResult = "Les demandes des clients sont trop grandes pour le nombre de véhicules";
+		graphData.textResult = "Les demandes des clients sont trop grandes pour le nombre de véhicules.";
 		return {...graphData};
 	}
 
     if (TMin > T) {
-		graphData.textResult = "La témpature minimale doit être supérieur à la température initiale";
+		graphData.textResult = "La témpature minimale doit être supérieur à la température initiale.";
 		return {...graphData};
 	}
 
 
     if (alpha >= 1 || alpha <= 0) {
-		graphData.textResult = "La réduction de température doit être comprise entre 0 et 1 non inclus";
+		graphData.textResult = "La réduction de température doit être comprise entre 0 et 1 non inclus.";
 		return {...graphData};
 	}
 

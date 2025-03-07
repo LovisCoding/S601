@@ -11,58 +11,58 @@ const GraphComponent = ({ graphData }) => {
     const [selectedIteration, setSelectedIteration] = useState("");
 
     useEffect(() => {
-        if (!graphData) return;
+        if (!graphData || !graphRef.current) return;
 
-		const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
+        const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
 
         const nodes = new DataSet(graphData.nodes.map(node => ({
             id: node.id,
             label: node.label,
             font: { 
                 color: "#000", 
-                size: node.fontSize, // Taille du texte augmentée
-                vadjust: 0 // Légère correction pour un meilleur centrage
+                size: node.fontSize,
+                vadjust: 0
             },
             color: { 
                 border: node.color, 
-                background: '#FFF', // Couleur différente pour le dépôt (facultatif)
+                background: '#FFF',
                 highlight: { border: "#000" } 
             },
             shape: "circle",
-            size: node.nodeSize, // Taille du dépôt plus grande
+            size: node.nodeSize,
             heightConstraint: { minimum: node.nodeSize, valign: "middle" },
             widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, 
             vehicle: node.vehicle,
             ask: node.ask,
             clientsTrajet : node.clientsTrajet
         })));
-                
-        const edges = new DataSet(filteredEdges.map(edge => {
-            return ({
-                from: edge.from,
-                to: edge.to,
-                label: edge.label.toString(),
-                arrows: 'to',
-                font: { align: "middle", color: "#000", size: 14 },
-                color: edge.color,
-                length: ((edge.edgeSize * 200) / (graphData.maxDistance))
-            });
-        }));
-    
+
+        const edges = new DataSet(filteredEdges.map(edge => ({
+            from: edge.from,
+            to: edge.to,
+            label: edge.label.toString(),
+            arrows: 'to',
+            font: { align: "middle", color: "#000", size: 14 },
+            color: edge.color,
+            length: ((edge.edgeSize * 200) / (graphData.maxDistance))
+        })));
+
         const networkData = { nodes, edges };
         const options = {
             edges: { color: "#000000", font: { align: 'middle' } },
             nodes: { shape: "circle" },
-            autoResize: false,
+            autoResize: true, // Assure que le graphique s'ajuste à l'écran
+            interaction: { hover: true },
+            physics: { stabilization: true },
+            layout: { improvedLayout: true } // Meilleure disposition des nœuds
         };
 
         const network = new Network(graphRef.current, networkData, options);
 
-        // Écoute du clic sur un nœud pour ouvrir la modal de détail
         network.on("click", (params) => {
             if (params.nodes.length) {
                 const nodeId = params.nodes[0];
-                if (nodeId == 0) return;
+                if (nodeId === 0) return;
                 const nodeData = nodes.get(nodeId);
                 setSelectedNode(nodeData);
                 setOpen(true);
@@ -86,9 +86,9 @@ const GraphComponent = ({ graphData }) => {
     };
 
     return (
-        <Box display="flex" width="100%" height="80vh" position="relative" >
-            <Box width="450px" display="flex" flexDirection="column">
-                <FormControl size="small" sx={{mb:4, mx:1}}>
+        <Box display="flex" flexDirection={{ xs: "column", md: "row" }} width="100%" height="96vh" position="relative">
+            <Box width={{ xs: "100%", md: "450px" }} display="flex" flexDirection="column">
+                <FormControl size="small" sx={{ mb: 4, mx: 1 }}>
                     <InputLabel>Ouvrir une solution précédente</InputLabel>
                     <Select value={selectedIteration} onChange={handleSelectChange} label="Ouvrir une solution précédente">
                         {graphData.previousBestSolutions.map(solution => (
@@ -99,7 +99,7 @@ const GraphComponent = ({ graphData }) => {
                     </Select>
                 </FormControl>
 
-                <Box display="flex" flexDirection="column" height="90%" overflow="auto" padding={2}>
+                <Box display="flex" flexDirection="column" height="75%" overflow="auto" padding={2}>
                     <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
                     <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
                         {graphData.textResult}
@@ -107,30 +107,26 @@ const GraphComponent = ({ graphData }) => {
                 </Box>
             </Box>
 
-            <Box ref={graphRef} flex={1} height="100%" order={2} />
+            <Box ref={graphRef} flex={1} height="100%" order={2} minWidth="300px" />
 
-            {/* Modal de détail pour afficher les informations du nœud sélectionné */}
             <Dialog open={openDetail} onClose={handleClose}>
                 <DialogTitle>Détail de la solution</DialogTitle>
                 <DialogContent>
                     {selectedDetail ? (
                         <>
-                            <Typography style={{whiteSpace:"pre-wrap"}}> 
+                            <Typography style={{ whiteSpace: "pre-wrap" }}>
                                 {selectedDetail.text}
                             </Typography>
                         </>
                     ) : (
                         <DialogContentText>Aucun détail disponible.</DialogContentText>
-                    )} 
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Fermer
-                    </Button>
+                    <Button onClick={handleClose} color="primary">Fermer</Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Modal de détail pour afficher les informations du nœud sélectionné */}
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Détail du Nœud</DialogTitle>
                 <DialogContent>
@@ -145,16 +141,13 @@ const GraphComponent = ({ graphData }) => {
                             <DialogContentText>
                                 <strong>📦 Demandes :</strong> {selectedNode.ask}
                             </DialogContentText>
-
                         </>
                     ) : (
                         <DialogContentText>Aucun détail disponible.</DialogContentText>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Fermer
-                    </Button>
+                    <Button onClick={handleClose} color="primary">Fermer</Button>
                 </DialogActions>
             </Dialog>
         </Box>
