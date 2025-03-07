@@ -157,7 +157,7 @@ export function startSimulatedAnnealing(data) {
 	}
 	textResult += "\n • 🛑 Raison de l'arrêt : " + raisonFin;
 	textResult += "\n • 🔄 Itérations utilisées : " + iterUtilisee;
-	textResult += "\n • 🌡️ Température atteinte : " + T.toFixed(2) + "/" + TMin;
+	textResult += "\n • 🌡️ Température atteinte : " + T.toFixed(3) + "/" + TMin;
 	textResult += "\n\n 🗺️ Trajets : ";
 
     textResult += getVehicleDetails(solution)
