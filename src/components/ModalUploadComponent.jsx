@@ -58,7 +58,6 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 	const startAlgo = async () => {
 		if (uploadSuccess) {
 			setLoading(true);
-			console.log(data)
 			const algoData = {
 				objectif: data.objectif,
 				nbVehicules: values.vehicles,
@@ -94,7 +93,6 @@ export default function ModalUploadComponent({ open, setOpen, onLaunch }) {
 			setUploadSuccess(true);
 			await convertDocument(event.target.files[0]).then((data) => {
 				setData(data);
-				console.log(data);
 			}).catch(() => {
 				setError("Le fichier ne peut pas être formaté");
 				setUploadSuccess(false);

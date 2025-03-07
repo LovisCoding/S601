@@ -13,7 +13,6 @@ const GraphComponent = ({ graphData }) => {
     useEffect(() => {
         if (!graphData) return;
 
-        console.log(graphData.previousBestSolutions)
 		const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
 
         const nodes = new DataSet(graphData.nodes.map(node => ({
@@ -65,7 +64,6 @@ const GraphComponent = ({ graphData }) => {
                 const nodeId = params.nodes[0];
                 if (nodeId == 0) return;
                 const nodeData = nodes.get(nodeId);
-                console.log(nodeData)
                 setSelectedNode(nodeData);
                 setOpen(true);
             }
@@ -142,11 +140,12 @@ const GraphComponent = ({ graphData }) => {
                                 <strong>🚚 Véhicule :</strong> {selectedNode.vehicle}
                             </DialogContentText>
                             <DialogContentText>
-                                <strong>📦 Demandes :</strong> {selectedNode.ask}
+                                <strong>👨🏻‍💼 Nombre de clients desservis par ce véhicule :</strong> {selectedNode.clientsTrajet}
                             </DialogContentText>
                             <DialogContentText>
-                                <strong>📦 Clients desservis par ce véhicule :</strong> {selectedNode.clientsTrajet}
+                                <strong>📦 Demandes :</strong> {selectedNode.ask}
                             </DialogContentText>
+
                         </>
                     ) : (
                         <DialogContentText>Aucun détail disponible.</DialogContentText>

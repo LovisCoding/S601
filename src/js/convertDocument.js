@@ -51,7 +51,6 @@ export default function convertDocument(file) {
 
                 resolve(jsonData);
             } catch (error) {
-                console.log("error file")
                 reject(error);
             }
         };
