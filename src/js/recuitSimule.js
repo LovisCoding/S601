@@ -92,6 +92,11 @@ export function startSimulatedAnnealing(data) {
 			raisonFin = " température minimale atteinte"
 			break;
 		}
+		if (objectif != 0 && bestObjective <= objectif) {
+			iterUtilisee = iter;
+			raisonFin = " fonction objectif trouvée";
+			break;
+		}
 	
 		let newSolution = perturbSolution(solution, T);
 
@@ -105,7 +110,7 @@ export function startSimulatedAnnealing(data) {
 		} 
 	
 		// Si aucune amélioration importante n'est détectée, on arrête plus tôt
-		if (Math.abs(bestObjective - newObjective) < minImprovement) {
+		if (Math.abs(bestObjective.toFixed(2) - newObjective.toFixed(2)) < minImprovement) {
 			noImprovementCounter++;
 			if (noImprovementCounter > maxIterations/100) {
 				iterUtilisee = iter;
@@ -119,7 +124,7 @@ export function startSimulatedAnnealing(data) {
         if (iter%(maxIterations/100) == 0) {
             previousBestSolutions.push({
                 iteration: iter,
-                text: getVehicleDetails(solution, true)
+                text: getVehicleDetails(newSolution, true)
             });
         }
 
