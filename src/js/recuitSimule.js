@@ -368,6 +368,7 @@ function generateGraphData(solution) {
                     nodeSize: 25, 
                     widthConstraint:50,
                     vehicle:idVehicle,
+					clientsTrajet: route.length,
                     ask:demandesClients[nodeId-1] 
                 });
 			}

@@ -35,6 +35,7 @@ const GraphComponent = ({ graphData }) => {
             widthConstraint: { minimum: node.widthConstraint, maximum: 200 }, 
             vehicle: node.vehicle,
             ask: node.ask,
+            clientsTrajet : node.clientsTrajet
         })));
                 
         const edges = new DataSet(filteredEdges.map(edge => {
@@ -78,10 +79,8 @@ const GraphComponent = ({ graphData }) => {
 
     const handleSelectChange = (event) => {
         const iteration = event.target.value;
-        console.log("iter : " + iteration)
         setSelectedIteration(iteration);
         const selectedSolution = graphData.previousBestSolutions.find(solution => solution.iteration === iteration);
-        console.log("selectedSolution : " + selectedSolution)
         if (selectedSolution) {
             setSelectedDetail(selectedSolution);
             setOpenDetail(true);
@@ -144,6 +143,9 @@ const GraphComponent = ({ graphData }) => {
                             </DialogContentText>
                             <DialogContentText>
                                 <strong>📦 Demandes :</strong> {selectedNode.ask}
+                            </DialogContentText>
+                            <DialogContentText>
+                                <strong>📦 Clients desservis par ce véhicule :</strong> {selectedNode.clientsTrajet}
                             </DialogContentText>
                         </>
                     ) : (
