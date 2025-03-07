@@ -86,7 +86,7 @@ const GraphComponent = ({ graphData }) => {
     };
 
     return (
-        <Box display="flex" flexDirection={{ xs: "column", md: "row" }} width="100%" height="96vh" position="relative">
+        <Box display="flex" flexDirection={{ xs: "column", md: "row" }} width="100%" height="80vh" position="relative">
             <Box width={{ xs: "100%", md: "450px" }} display="flex" flexDirection="column">
                 <FormControl size="small" sx={{ mb: 4, mx: 1 }}>
                     <InputLabel>Ouvrir une solution précédente</InputLabel>
@@ -99,7 +99,7 @@ const GraphComponent = ({ graphData }) => {
                     </Select>
                 </FormControl>
 
-                <Box display="flex" flexDirection="column" height="75%" overflow="auto" padding={2}>
+                <Box display="flex" flexDirection="column" height="90%" overflow="auto" padding={2}>
                     <Typography variant="h6" fontWeight="bold">📋 Résumé de la Solution :</Typography>
                     <Typography component="pre" whiteSpace="pre-wrap" mt={1}>
                         {graphData.textResult}
