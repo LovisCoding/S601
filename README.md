@@ -21,6 +21,8 @@ Dans le cadre du projet SAE 6.01, notre objectif était de développer une appli
 
 ## 🛠️ **Installation**
 
+> **Note** : Ce projet est également disponible en ligne à l'adresse suivante : [RouteSolver](https://s601.vercel.app)
+
 ### 1. **Cloner le dépôt**
 Récupérez le projet en local avec la commande suivante :
 ```bash
