@@ -1,12 +1,58 @@
-# React + Vite
+<div align="center">
+    <h1>ROUTESOLVER</h1>
+</div>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
+    <img src="src/assets/img/RouteSolver.png" alt="Logo de RouteSolver" width="300">
+</div>
 
-Currently, two official plugins are available:
+## Introduction
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Dans le cadre du projet SAE 6.01, notre objectif était de développer une application d'optimisation des tournées de livraison de véhicules, en utilisant des méthodes mathématiques avancées et des algorithmes heuristiques.
 
-## Expanding the ESLint configuration
+## ✨ **Fonctionnalités clés de l'application**
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Optimisation des tournées de livraison en minimisant la distance parcourue.**
+- **Prise en compte des contraintes de capacité des véhicules et des demandes clients.**
+- **Interface utilisateur interactive développée avec React.js.**
+- **Visualisation des tournées optimisées à l'aide de Vis.js.**
+- **Importation et gestion des fichiers de données.**
+- **Paramétrage dynamique de l'algorithme via l'interface.**
+
+## 🛠️ **Installation**
+
+### 1. **Cloner le dépôt**
+Récupérez le projet en local avec la commande suivante :
+```bash
+git clone git@github.com:LovisCoding/S601.git
+```
+
+### 2. **Accéder au projet**
+Déplacez-vous dans le dossier du projet :
+```bash
+cd S601
+```
+
+### 3. **Installer les dépendances**
+Installez les bibliothèques nécessaires avec npm :
+```bash
+npm install
+```
+
+### 4. **Démarrer l'application**
+Lancez l'application avec la commande :
+```bash
+npm run dev
+```
+
+### 5. **Accéder à l'application**
+Ouvrez votre navigateur et accédez au site via l'adresse :
+```bash
+http://localhost:5173
+```
+
+## 🚀 Technologies utilisées
+
+- IBM ILOG CPLEX pour la modélisation mathématique
+- JavaScript (React.js) pour l'interface utilisateur
+- Vis.js pour la visualisation des tournées
