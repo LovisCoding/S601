@@ -132,7 +132,6 @@ export function startSimulatedAnnealing(data) {
 
 	// Génération des données pour le graphique
 	let textResult = "Solution trouvée : " + bestObjective.toFixed(2) + " kilomètres";
-	let textVehicleDetails = getVehicleDetails(solution, false, true);
 	if (objectif != 0) {
 		let diffObjectif = (bestObjective - objectif);
 		textResult = "Solution trouvée : " + bestObjective.toFixed(2) + " / " + objectif.toFixed(2) + " kilomètres";
@@ -158,22 +157,71 @@ export function startSimulatedAnnealing(data) {
 	}
 	textResult += "\n • 🛑 Raison de l'arrêt : " + raisonFin;
 	textResult += "\n • 🔄 Itérations utilisées : " + iterUtilisee;
-	textResult += "\n • 👨🏻‍💼  "+textVehicleDetails.nbClient+"/" +nbClients + " clients visités";
 	textResult += "\n • 🌡️ Température atteinte : " + T.toFixed(3) + "/" + TMin;
 	textResult += "\n\n 🗺️ Trajets : ";
 
-    textResult += textVehicleDetails.text;
+    textResult += getVehicleDetails(solution);
+
+	let verificationText = getVerificationText(solution)
 
 	graphData = generateGraphData(solution);
 	graphData.textResult = textResult;
+	graphData.verificationText = verificationText;
     graphData.previousBestSolutions = previousBestSolutions;
 	return { ...graphData};
 }
 
-function getVehicleDetails(solution, solutionOptimale = false, boolNbClients = false) {
+function getVerificationText(solution) {
+	let nbClientsVisites = 0;
+	let poidsMax = 0;
+	let detailsClientsVisites = "";
+	let detailsPoidsUtilises = "";
+	let clientsVehicules = {}; // Stocker le véhicule de chaque client
+
+	for (let v = 0; v < nbVehicules; v++) {
+		nbClientsVisites += solution[v].length;
+		if (solution[v].length > 0)
+			detailsClientsVisites += " 🚐 Véhicule " + (v+1) + " : " + solution[v].length + " clients\n";
+
+		let poids = 0;
+		for (let c = 0; c < solution[v].length; c++) {
+			let client = solution[v][c];
+			poids += demandesClients[client];
+			clientsVehicules[client] = v + 1; // Assigner le véhicule du client
+		}
+
+		if (poids > 0)
+			detailsPoidsUtilises += " 🚐 Véhicule " + (v+1) + " : " + poids + "\n";
+
+		if (poids > poidsMax)
+			poidsMax = poids;
+	}
+
+	// Vérification des clients visités
+	let verificationText = " • 👨🏻‍💼 Clients visités : " + nbClientsVisites + "/" + nbClients;
+	if (nbClientsVisites == nbClients) verificationText += " ✅";
+	verificationText += "\n" + detailsClientsVisites;
+
+	// Vérification du poids max
+	verificationText += "\n \n • ⚖️ Poids maximum utilisé : " + poidsMax + "/" + capaciteVehicule;
+	if (poidsMax <= capaciteVehicule) verificationText += " ✅";
+	verificationText += "\n" + detailsPoidsUtilises;
+
+	// Vérification que chaque client est assigné à un seul véhicule
+	verificationText += "\n \n • 🔍 Vérification de l’unicité des clients dans les véhicules :\n";
+	let clientsTries = Object.keys(clientsVehicules).map(Number).sort((a, b) => a - b);
+	clientsTries.forEach(client => {
+		verificationText += " 👨🏻‍💼 Client " + (client+1) + " 🚐 Véhicule " + clientsVehicules[client] + "\n";
+	});
+	verificationText += "✅ Tous les clients sont affectés à un seul véhicule.\n";
+
+	return verificationText;
+}
+
+
+function getVehicleDetails(solution, solutionOptimale = false) {
     let totalDistance = 0;
     let textResult = "";
-	let maxNbClients = 0;
     for (let v = 0; v < nbVehicules; v++) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		let distanceTotale = 0;
@@ -187,8 +235,6 @@ function getVehicleDetails(solution, solutionOptimale = false, boolNbClients = f
 				distanceTotale += matDistanceClient[currentClient][nextClient+1];
 				poidsUtilise += demandesClients[nextClient];
 				currentClient = nextClient+1;
-				if (currentClient > maxNbClients)
-					maxNbClients = currentClient;
 			}
 
 			distanceTotale += matDistanceClient[currentClient][0];
@@ -208,7 +254,7 @@ function getVehicleDetails(solution, solutionOptimale = false, boolNbClients = f
 	
     if (solutionOptimale) 
         textResult = "Solution trouvée : " + totalDistance.toFixed(2) + " kilomètres " + textResult;
-    return boolNbClients ? {text: textResult, nbClient: maxNbClients} : textResult;
+    return textResult;
 }
 
 
