@@ -132,6 +132,7 @@ export function startSimulatedAnnealing(data) {
 
 	// Génération des données pour le graphique
 	let textResult = "Solution trouvée : " + bestObjective.toFixed(2) + " kilomètres";
+	let textVehicleDetails = getVehicleDetails(solution, false, true);
 	if (objectif != 0) {
 		let diffObjectif = (bestObjective - objectif);
 		textResult = "Solution trouvée : " + bestObjective.toFixed(2) + " / " + objectif.toFixed(2) + " kilomètres";
@@ -157,10 +158,11 @@ export function startSimulatedAnnealing(data) {
 	}
 	textResult += "\n • 🛑 Raison de l'arrêt : " + raisonFin;
 	textResult += "\n • 🔄 Itérations utilisées : " + iterUtilisee;
+	textResult += "\n • 👨🏻‍💼  "+textVehicleDetails.nbClient+"/" +nbClients + " clients visités";
 	textResult += "\n • 🌡️ Température atteinte : " + T.toFixed(3) + "/" + TMin;
 	textResult += "\n\n 🗺️ Trajets : ";
 
-    textResult += getVehicleDetails(solution)
+    textResult += textVehicleDetails.text;
 
 	graphData = generateGraphData(solution);
 	graphData.textResult = textResult;
@@ -168,9 +170,10 @@ export function startSimulatedAnnealing(data) {
 	return { ...graphData};
 }
 
-function getVehicleDetails(solution, solutionOptimale = false) {
+function getVehicleDetails(solution, solutionOptimale = false, boolNbClients = false) {
     let totalDistance = 0;
     let textResult = "";
+	let maxNbClients = 0;
     for (let v = 0; v < nbVehicules; v++) {
 		textResult += "\n\n 🚚 Véhicule " + (v+1) + " : ";
 		let distanceTotale = 0;
@@ -184,6 +187,8 @@ function getVehicleDetails(solution, solutionOptimale = false) {
 				distanceTotale += matDistanceClient[currentClient][nextClient+1];
 				poidsUtilise += demandesClients[nextClient];
 				currentClient = nextClient+1;
+				if (currentClient > maxNbClients)
+					maxNbClients = currentClient;
 			}
 
 			distanceTotale += matDistanceClient[currentClient][0];
@@ -199,9 +204,11 @@ function getVehicleDetails(solution, solutionOptimale = false) {
         totalDistance += distanceTotale
 	}
 
+	
+	
     if (solutionOptimale) 
         textResult = "Solution trouvée : " + totalDistance.toFixed(2) + " kilomètres " + textResult;
-    return textResult;
+    return boolNbClients ? {text: textResult, nbClient: maxNbClients} : textResult;
 }
 
 
