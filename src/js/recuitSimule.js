@@ -48,6 +48,8 @@ export function startSimulatedAnnealing(data) {
 
     let previousBestSolutions = [];
 
+	let solutionsList = [];
+
 	graphData.edges = [];
 	graphData.nodes = [];
     graphData.previousBestSolutions = previousBestSolutions;
@@ -126,6 +128,7 @@ export function startSimulatedAnnealing(data) {
                 iteration: iter,
                 text: getVehicleDetails(newSolution, true)
             });
+			solutionsList.push(newObjective);
         }
 
 	}
@@ -168,6 +171,8 @@ export function startSimulatedAnnealing(data) {
 	graphData.textResult = textResult;
 	graphData.verificationText = verificationText;
     graphData.previousBestSolutions = previousBestSolutions;
+	graphData.solutionsList = solutionsList;
+	graphData.step = maxIterations/100;
 	return { ...graphData};
 }
 

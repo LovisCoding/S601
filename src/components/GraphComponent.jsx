@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { DataSet, Network } from "vis-network/standalone";
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Typography, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
 
 const GraphComponent = ({ graphData }) => {
     const graphRef = useRef(null);
@@ -12,6 +17,12 @@ const GraphComponent = ({ graphData }) => {
     const [selectedVerification, setSelectedVerification] = useState(null);
     const [selectedIteration, setSelectedIteration] = useState("");
 
+    const [stepIteration, setStepIteration] = useState(1);
+
+    
+    const [openDiagram, setOpenDiagram] = useState(false);
+    const [selectedDiagram, setSelectedDiagram] = useState([]);
+
     const [visibleLines, setVisibleLines] = useState([]);
     const [fullTextLines, setFullTextLines] = useState([]);
 
@@ -21,6 +32,14 @@ const GraphComponent = ({ graphData }) => {
 
         if (graphData.verificationText)
             setSelectedVerification(graphData.verificationText);
+        else 
+            setSelectedVerification("Pas de vérification disponible");
+
+        if (graphData.solutionsList)
+            setSelectedDiagram(graphData.solutionsList);
+
+        if (graphData.step)
+            setStepIteration(graphData.step)
 
         const filteredEdges = graphData.edges.filter(edge => !(edge.from === 0 && edge.to === 0));
 
@@ -83,6 +102,7 @@ const GraphComponent = ({ graphData }) => {
         setOpen(false);
         setOpenDetail(false);
         setOpenVerification(false);
+        setOpenDiagram(false);
         setVisibleLines([]);
     };
 
@@ -112,19 +132,57 @@ const GraphComponent = ({ graphData }) => {
         }
     };
 
+    const handleOpenDiagram = () => {
+        if (selectedDiagram) {
+            setOpenDiagram(true);
+        }
+    }
+
+    const chartData = {
+        labels: selectedDiagram.map((_, index) => index * stepIteration), 
+        datasets: [
+            {
+                label: 'Évolution de la solution',
+                data: selectedDiagram,
+                borderColor: 'rgba(255, 147, 32, 1)',
+                backgroundColor: 'rgba(75,192,192,0.2)',
+                borderWidth: 2,
+                tension: 0.6,
+            },
+        ],
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: { title: { display: true, text: "Itérations" } },
+            y: { title: { display: true, text: "Valeur" } },
+        },
+        plugins: {
+            legend: { display: false },
+        },
+    };
+
+
     return (
         <Box display="flex" flexDirection={{ xs: "column", md: "row" }} width="100%" height="80vh" position="relative">
             <Box width={{ xs: "100%", md: "450px" }} display="flex" flexDirection="column">
-                <FormControl size="small" sx={{ mb: 4, mx: 1 }}>
-                    <InputLabel>Ouvrir une solution précédente</InputLabel>
-                    <Select value={selectedIteration} onChange={handleSelectChange} label="Ouvrir une solution précédente">
-                        {graphData.previousBestSolutions.map(solution => (
-                            <MenuItem key={solution.iteration} value={solution.iteration}>
-                                Iteration {solution.iteration}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <Box display="flex" gap="10px" sx={{ mb: 4, mx: 1 }}>
+                    <Box width="90%"> 
+                        <FormControl size="small" fullWidth>
+                            <InputLabel>Ouvrir une solution précédente</InputLabel>
+                            <Select value={selectedIteration} onChange={handleSelectChange} label="Ouvrir une solution précédente">
+                                {graphData.previousBestSolutions.map(solution => (
+                                    <MenuItem key={solution.iteration} value={solution.iteration}>
+                                        Iteration {solution.iteration}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Button onClick={handleOpenDiagram}>📈</Button>
+                </Box>
 
                 <Box display="flex" flexDirection="column" height="90%" overflow="auto" padding={2}>
                     <Box display="flex" gap="10px">
@@ -219,6 +277,20 @@ const GraphComponent = ({ graphData }) => {
                         </>
                     ) : (
                         <DialogContentText>Aucun détail disponible.</DialogContentText>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Fermer</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={openDiagram} onClose={handleClose} maxWidth="md" fullWidth>
+                <DialogTitle>Evolution de la solution</DialogTitle>
+                <DialogContent style={{ height: 400 }}>
+                    {selectedDiagram && selectedDiagram.length > 0 ? (
+                        <Line data={chartData} options={chartOptions} />
+                    ) : (
+                        <p>Aucune donnée disponible.</p>
                     )}
                 </DialogContent>
                 <DialogActions>
